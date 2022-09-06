@@ -1,0 +1,36 @@
+.html-preview-root {
+  position: relative;
+  white-space: initial;
+
+  &:hover {
+    background: linear-gradient(
+      17deg,
+      var(--editorBgColor) 36.65%,
+      var(--editorColor04)
+    );
+
+    .html-code-icon {
+      display: block;
+    }
+  }
+
+  .html-code-icon {
+    position: absolute;
+    top: 4px;
+    right: 10px;
+    display: none;
+    cursor: pointer;
+  }
+}
+
+.html-edit-root {
+  position: relative;
+
+  .html-check-icon {
+    position: absolute;
+    top: 4px;
+    right: 10px;
+    cursor: pointer;
+    z-index: 1;
+  }
+}

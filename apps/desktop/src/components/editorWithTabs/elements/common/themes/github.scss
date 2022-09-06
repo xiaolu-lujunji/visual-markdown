@@ -1,0 +1,10 @@
+.cm-editor {
+  padding: 16px;
+  margin-bottom: 16px;
+  background-color: var(--color-canvas-subtle);
+  border-radius: 6px;
+
+  .cm-line {
+    font-family: "Lucida Console", Consolas, "Courier", monospace;
+  }
+}
