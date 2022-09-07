@@ -1,16 +1,14 @@
-import React from "react";
-import { sanitize } from "dompurify";
-import parse, {
-  attributesToProps,
-  HTMLReactParserOptions,
-} from "html-react-parser";
-import CodeMirror from "./common/code-mirror";
-import { ReactEditor, RenderElementProps, useSlateStatic } from "slate-react";
-import type { HTML as HTMLSpec } from "../specs/common-mark";
-import type { Text } from "@codemirror/state";
-import { parseImageSrc } from "../utils";
-import "./html.scss";
-import { Transforms } from "slate";
+import React from 'react';
+import { sanitize } from 'dompurify';
+import parse, { attributesToProps, HTMLReactParserOptions, domToReact } from 'html-react-parser';
+import CodeMirror from './common/code-mirror';
+import { ReactEditor, RenderElementProps, useSlateStatic } from 'slate-react';
+import type { HTML as HTMLSpec } from '../specs/common-mark';
+import type { Text } from '@codemirror/state';
+import { parseImageSrc } from '../utils';
+import './html.scss';
+import { Transforms } from 'slate';
+import { open } from 'api/shell';
 
 const CodeIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
@@ -47,11 +45,19 @@ const options: HTMLReactParserOptions = {
     // TODO: why domNode instanceof Element is false?
     if (
       // domNode instanceof Element &&
-      domNode.tagName === "img" &&
+      domNode.tagName === 'img' &&
       domNode.attribs
     ) {
       const { src, ...other } = attributesToProps(domNode.attribs);
       return <img src={parseImageSrc(src)} {...other} />;
+    }
+    if (domNode.tagName === 'a' && domNode.attribs) {
+      const props = attributesToProps(domNode.attribs);
+      return (
+        <a {...props} onClick={() => open(props.href)}>
+          {domToReact(domNode.children, options)}
+        </a>
+      );
     }
   },
 };
@@ -70,16 +76,9 @@ export default function HTML(props: RenderElementProps) {
 
   if (!preview) {
     return (
-      <div
-        {...props.attributes}
-        contentEditable={false}
-        className="html-edit-root"
-      >
+      <div {...props.attributes} contentEditable={false} className="html-edit-root">
         {props.children}
-        <CheckIcon
-          className="html-check-icon"
-          onClick={() => setPreview(true)}
-        />
+        <CheckIcon className="html-check-icon" onClick={() => setPreview(true)} />
         <CodeMirror
           doc={(element as HTMLSpec).value}
           lang="html"
@@ -91,11 +90,7 @@ export default function HTML(props: RenderElementProps) {
   }
 
   return (
-    <div
-      {...props.attributes}
-      contentEditable={false}
-      className="html-preview-root"
-    >
+    <div {...props.attributes} contentEditable={false} className="html-preview-root">
       {props.children}
       <CodeIcon className="html-code-icon" onClick={() => setPreview(false)} />
       {parse(sanitize((props.element as HTMLSpec).value), options)}

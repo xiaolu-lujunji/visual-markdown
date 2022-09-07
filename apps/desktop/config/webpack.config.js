@@ -216,6 +216,7 @@ const rendererConfig = {
     alias: {
       main: path.join(__dirname, '../src-electron'),
       '@': path.join(__dirname, '../src'),
+      api: path.join(__dirname, '../../../packages/api/src'),
       common: path.join(__dirname, '../../../packages/common'),
       muya: path.join(__dirname, '../../../packages/muya'),
       snapsvg: path.join(__dirname, '../../../packages/muya/lib/assets/libs/snap.svg-min.js'),
