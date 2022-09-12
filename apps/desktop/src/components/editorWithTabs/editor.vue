@@ -1,11 +1,16 @@
 <template>
-  <div class="editor-wrapper" :class="[{ typewriter: typewriter, focus: focus, source: sourceCode }]" :style="{
-    lineHeight: lineHeight,
-    fontSize: `${fontSize}px`,
-    'font-family': editorFontFamily
-      ? `${editorFontFamily}, ${defaultFontFamily}`
-      : `${defaultFontFamily}`,
-  }" :dir="textDirection">
+  <div
+    class="editor-wrapper"
+    :class="[{ typewriter: typewriter, focus: focus, source: sourceCode }]"
+    :style="{
+      lineHeight: lineHeight,
+      fontSize: `${fontSize}px`,
+      'font-family': editorFontFamily
+        ? `${editorFontFamily}, ${defaultFontFamily}`
+        : `${defaultFontFamily}`,
+    }"
+    :dir="textDirection"
+  >
     <div ref="editor" class="editor-component"></div>
     <div class="image-viewer" v-show="imageViewerVisible">
       <span class="icon-close" @click="setImageViewerVisible(false)">
@@ -15,24 +20,41 @@
       </span>
       <div ref="imageViewer"></div>
     </div>
-    <el-dialog :visible.sync="dialogTableVisible" :show-close="isShowClose" :modal="true" custom-class="ag-dialog-table"
-      width="454px" center dir="ltr">
+    <el-dialog
+      :visible.sync="dialogTableVisible"
+      :show-close="isShowClose"
+      :modal="true"
+      custom-class="ag-dialog-table"
+      width="454px"
+      center
+      dir="ltr"
+    >
       <div slot="title" class="dialog-title">Insert Table</div>
       <el-form :model="tableChecker" :inline="true">
         <el-form-item label="Rows">
-          <el-input-number ref="rowInput" size="mini" v-model="tableChecker.rows" controls-position="right" :min="1"
-            :max="30"></el-input-number>
+          <el-input-number
+            ref="rowInput"
+            size="mini"
+            v-model="tableChecker.rows"
+            controls-position="right"
+            :min="1"
+            :max="30"
+          ></el-input-number>
         </el-form-item>
         <el-form-item label="Columns">
-          <el-input-number size="mini" v-model="tableChecker.columns" controls-position="right" :min="1" :max="20">
+          <el-input-number
+            size="mini"
+            v-model="tableChecker.columns"
+            controls-position="right"
+            :min="1"
+            :max="20"
+          >
           </el-input-number>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogTableVisible = false"> Cancel </el-button>
-        <el-button type="primary" @click="handleDialogTableConfirm">
-          OK
-        </el-button>
+        <el-button type="primary" @click="handleDialogTableConfirm"> OK </el-button>
       </div>
     </el-dialog>
     <search v-if="!sourceCode"></search>
@@ -40,60 +62,53 @@
 </template>
 
 <script lang="ts">
-import { shell } from "electron";
-import path from "path";
-import log from "electron-log";
-import { mapState } from "vuex";
+import { shell } from 'electron';
+import path from 'path';
+import log from 'electron-log';
+import { mapState } from 'vuex';
 // import ViewImage from 'view-image'
-import { isChildOfDirectory } from "common/filesystem/paths";
-import Muya from "muya/lib";
-import TablePicker from "muya/lib/ui/tablePicker";
-import QuickInsert from "muya/lib/ui/quickInsert";
-import CodePicker from "muya/lib/ui/codePicker";
-import EmojiPicker from "muya/lib/ui/emojiPicker";
-import ImagePathPicker from "muya/lib/ui/imagePicker";
-import ImageSelector from "muya/lib/ui/imageSelector";
-import ImageToolbar from "muya/lib/ui/imageToolbar";
-import Transformer from "muya/lib/ui/transformer";
-import FormatPicker from "muya/lib/ui/formatPicker";
-import LinkTools from "muya/lib/ui/linkTools";
-import FootnoteTool from "muya/lib/ui/footnoteTool";
-import TableBarTools from "muya/lib/ui/tableTools";
-import FrontMenu from "muya/lib/ui/frontMenu";
-import Search from "../search";
-import bus from "@/bus";
-import { DEFAULT_EDITOR_FONT_FAMILY } from "@/config";
-import notice from "@/services/notification";
-import Printer from "@/services/printService";
-import { SpellcheckerLanguageCommand } from "@/commands";
-import { SpellChecker } from "@/spellchecker";
-import { isOsx, animatedScrollTo } from "@/util";
-import {
-  moveImageToFolder,
-  moveToRelativeFolder,
-  uploadImage,
-} from "@/util/fileSystem";
-import { guessClipboardFilePath } from "@/util/clipboard";
-import { getCssForOptions, getHtmlToc } from "@/util/pdf";
-import { addCommonStyle, setEditorWidth } from "@/util/theme";
+import { isChildOfDirectory } from 'common/filesystem/paths';
+import Muya from 'muya/lib';
+import TablePicker from 'muya/lib/ui/tablePicker';
+import QuickInsert from 'muya/lib/ui/quickInsert';
+import CodePicker from 'muya/lib/ui/codePicker';
+import EmojiPicker from 'muya/lib/ui/emojiPicker';
+import ImagePathPicker from 'muya/lib/ui/imagePicker';
+import ImageSelector from 'muya/lib/ui/imageSelector';
+import ImageToolbar from 'muya/lib/ui/imageToolbar';
+import Transformer from 'muya/lib/ui/transformer';
+import FormatPicker from 'muya/lib/ui/formatPicker';
+import LinkTools from 'muya/lib/ui/linkTools';
+import FootnoteTool from 'muya/lib/ui/footnoteTool';
+import TableBarTools from 'muya/lib/ui/tableTools';
+import FrontMenu from 'muya/lib/ui/frontMenu';
+import Search from '../search';
+import bus from '@/bus';
+import { DEFAULT_EDITOR_FONT_FAMILY } from '@/config';
+import notice from '@/services/notification';
+import Printer from '@/services/printService';
+import { SpellcheckerLanguageCommand } from '@/commands';
+import { SpellChecker } from '@/spellchecker';
+import { isOsx, animatedScrollTo } from '@/util';
+import { moveImageToFolder, moveToRelativeFolder, uploadImage } from '@/util/fileSystem';
+import { guessClipboardFilePath } from '@/util/clipboard';
+import { getCssForOptions, getHtmlToc } from '@/util/pdf';
+import { addCommonStyle, setEditorWidth } from '@/util/theme';
 
 // import "muya/themes/default.css";
-import "@/assets/themes/codemirror/one-dark.css";
+import '@/assets/themes/codemirror/one-dark.css';
 // import 'view-image/lib/imgViewer.css'
-import CloseIcon from "@/assets/icons/close.svg";
-import { createRoot } from "react-dom/client";
-import React from "react";
-import { createEditor } from "slate";
-import { withHistory } from "slate-history";
-import { Slate, Editable, withReact } from "slate-react";
-import withMarkdown from "./with-markdown";
-import deserialize from "./deserialize";
-import renderElement from "./render-element";
-import handleKeyDown from "./handle-key-down";
-import decorate from "./decorate";
-import renderLeaf from "./render-leaf";
-import "./styles/github-markdown.css";
-import "./editor.css";
+import CloseIcon from '@/assets/icons/close.svg';
+import { createRoot } from 'react-dom/client';
+import React from 'react';
+import { createEditor } from 'slate';
+import { Slate, withReact } from 'slate-react';
+import Editable from 'markdown-core/editable';
+import './styles/github-markdown.css';
+import './editor.css';
+import { unified } from 'unified';
+import remarkCommonMark from 'markdown-core/plugins/common-mark/remark-common-mark';
+import type { Descendant } from 'slate';
 
 const STANDAR_Y = 320;
 
@@ -117,8 +132,7 @@ export default {
       preferences: (state) => state.preferences,
       preferLooseListItem: (state) => state.preferences.preferLooseListItem,
       autoPairBracket: (state) => state.preferences.autoPairBracket,
-      autoPairMarkdownSyntax: (state) =>
-        state.preferences.autoPairMarkdownSyntax,
+      autoPairMarkdownSyntax: (state) => state.preferences.autoPairMarkdownSyntax,
       autoPairQuote: (state) => state.preferences.autoPairQuote,
       bulletListMarker: (state) => state.preferences.bulletListMarker,
       orderListDelimiter: (state) => state.preferences.orderListDelimiter,
@@ -128,8 +142,7 @@ export default {
       superSubScript: (state) => state.preferences.superSubScript,
       footnote: (state) => state.preferences.footnote,
       isHtmlEnabled: (state) => state.preferences.isHtmlEnabled,
-      isGitlabCompatibilityEnabled: (state) =>
-        state.preferences.isGitlabCompatibilityEnabled,
+      isGitlabCompatibilityEnabled: (state) => state.preferences.isGitlabCompatibilityEnabled,
       lineHeight: (state) => state.preferences.lineHeight,
       fontSize: (state) => state.preferences.fontSize,
       codeFontSize: (state) => state.preferences.codeFontSize,
@@ -143,17 +156,14 @@ export default {
       autoCheck: (state) => state.preferences.autoCheck,
       editorLineWidth: (state) => state.preferences.editorLineWidth,
       imageInsertAction: (state) => state.preferences.imageInsertAction,
-      imagePreferRelativeDirectory: (state) =>
-        state.preferences.imagePreferRelativeDirectory,
-      imageRelativeDirectoryName: (state) =>
-        state.preferences.imageRelativeDirectoryName,
+      imagePreferRelativeDirectory: (state) => state.preferences.imagePreferRelativeDirectory,
+      imageRelativeDirectoryName: (state) => state.preferences.imageRelativeDirectoryName,
       imageFolderPath: (state) => state.preferences.imageFolderPath,
       theme: (state) => state.preferences.theme,
       sequenceTheme: (state) => state.preferences.sequenceTheme,
       hideScrollbar: (state) => state.preferences.hideScrollbar,
       spellcheckerEnabled: (state) => state.preferences.spellcheckerEnabled,
-      spellcheckerNoUnderline: (state) =>
-        state.preferences.spellcheckerNoUnderline,
+      spellcheckerNoUnderline: (state) => state.preferences.spellcheckerNoUnderline,
       spellcheckerLanguage: (state) => state.preferences.spellcheckerLanguage,
 
       currentFile: (state) => state.editor.currentFile,
@@ -173,7 +183,7 @@ export default {
     return {
       selectionChange: null,
       editor: null,
-      pathname: "",
+      pathname: '',
       isShowClose: false,
       dialogTableVisible: false,
       imageViewerVisible: false,
@@ -231,18 +241,18 @@ export default {
         if (/dark/i.test(value)) {
           this.editor.setOptions(
             {
-              mermaidTheme: "dark",
-              vegaTheme: "dark",
+              mermaidTheme: 'dark',
+              vegaTheme: 'dark',
             },
-            true
+            true,
           );
         } else {
           this.editor.setOptions(
             {
-              mermaidTheme: "default",
-              vegaTheme: "latimes",
+              mermaidTheme: 'default',
+              vegaTheme: 'latimes',
             },
-            true
+            true,
           );
         }
       }
@@ -545,9 +555,16 @@ export default {
       //   });
       // }
 
-      const editor = withMarkdown(withReact(withHistory(createEditor())));
+      const editor = withReact(createEditor());
 
-      const value = deserialize(this.markdown);
+      console.log(remarkCommonMark);
+
+      const processor = unified().use(remarkCommonMark);
+      const tree = processor.processSync(this.markdown);
+      let value = tree.result.children as Descendant[];
+      if (value.length === 0) {
+        value = [{ type: 'paragraph', children: [{ text: '' }] }];
+      }
 
       console.log(value);
 
@@ -556,22 +573,8 @@ export default {
         React.createElement(
           React.StrictMode,
           {},
-          React.createElement(
-            Slate,
-            { editor, value },
-            React.createElement(
-              Editable,
-              {
-                className: "markdown-body",
-                renderElement,
-                renderLeaf,
-                decorate,
-                onKeyDown: (event) => handleKeyDown(event, editor),
-              },
-              null
-            )
-          )
-        )
+          React.createElement(Slate, { editor, value }, React.createElement(Editable, {}, null)),
+        ),
       );
 
       // const { container } = (this.editor = new Muya(ele, options))
@@ -716,24 +719,24 @@ export default {
 
     jumpClick(linkInfo) {
       const { href } = linkInfo;
-      this.$store.dispatch("FORMAT_LINK_CLICK", {
+      this.$store.dispatch('FORMAT_LINK_CLICK', {
         data: { href },
         dirname: window.DIRNAME,
       });
     },
 
     async imagePathAutoComplete(src) {
-      const files = await this.$store.dispatch("ASK_FOR_IMAGE_AUTO_PATH", src);
+      const files = await this.$store.dispatch('ASK_FOR_IMAGE_AUTO_PATH', src);
       return files.map((f) => {
-        const iconClass = f.type === "directory" ? "icon-folder" : "icon-image";
+        const iconClass = f.type === 'directory' ? 'icon-folder' : 'icon-image';
         return Object.assign(f, {
           iconClass,
-          text: f.file + (f.type === "directory" ? "/" : ""),
+          text: f.file + (f.type === 'directory' ? '/' : ''),
         });
       });
     },
 
-    async imageAction(image, id, alt = "") {
+    async imageAction(image, id, alt = '') {
       // TODO(Refactor): Refactor this method.
       const {
         imageInsertAction,
@@ -764,61 +767,47 @@ export default {
       const getResolvedImagePath = (imagePath) => {
         const replacement = isTabSavedOnDisk
           ? // Filename w/o extension
-          filename.replace(/\.[^/.]+$/, "")
-          : "";
+            filename.replace(/\.[^/.]+$/, '')
+          : '';
         return imagePath.replace(/\${filename}/g, replacement);
       };
 
       const resolvedImageFolderPath = getResolvedImagePath(imageFolderPath);
-      const resolvedImageRelativeDirectoryName = getResolvedImagePath(
-        imageRelativeDirectoryName
-      );
-      let destImagePath = "";
+      const resolvedImageRelativeDirectoryName = getResolvedImagePath(imageRelativeDirectoryName);
+      let destImagePath = '';
       switch (imageInsertAction) {
-        case "upload": {
+        case 'upload': {
           try {
             destImagePath = await uploadImage(pathname, image, preferences);
           } catch (err) {
             notice.notify({
-              title: "Upload Image",
-              type: "warning",
+              title: 'Upload Image',
+              type: 'warning',
               message: err,
             });
-            destImagePath = await moveImageToFolder(
-              pathname,
-              image,
-              resolvedImageFolderPath
-            );
+            destImagePath = await moveImageToFolder(pathname, image, resolvedImageFolderPath);
           }
           break;
         }
-        case "folder": {
-          destImagePath = await moveImageToFolder(
-            pathname,
-            image,
-            resolvedImageFolderPath
-          );
+        case 'folder': {
+          destImagePath = await moveImageToFolder(pathname, image, resolvedImageFolderPath);
           if (isTabSavedOnDisk && imagePreferRelativeDirectory) {
             destImagePath = await moveToRelativeFolder(
               relativeBasePath,
               resolvedImageRelativeDirectoryName,
               pathname,
-              destImagePath
+              destImagePath,
             );
           }
           break;
         }
-        case "path": {
-          if (typeof image === "string") {
+        case 'path': {
+          if (typeof image === 'string') {
             // Input is a local path.
             destImagePath = image;
           } else {
             // Save and move image to image folder if input is binary.
-            destImagePath = await moveImageToFolder(
-              pathname,
-              image,
-              resolvedImageFolderPath
-            );
+            destImagePath = await moveImageToFolder(pathname, image, resolvedImageFolderPath);
 
             // Respect user preferences if tab exists on disk.
             if (isTabSavedOnDisk && imagePreferRelativeDirectory) {
@@ -826,7 +815,7 @@ export default {
                 relativeBasePath,
                 resolvedImageRelativeDirectoryName,
                 pathname,
-                destImagePath
+                destImagePath,
               );
             }
           }
@@ -835,7 +824,7 @@ export default {
       }
 
       if (id && this.sourceCode) {
-        bus.$emit("image-action", {
+        bus.$emit('image-action', {
           id,
           result: destImagePath,
           alt,
@@ -845,11 +834,11 @@ export default {
     },
 
     imagePathPicker() {
-      return this.$store.dispatch("ASK_FOR_IMAGE_PATH");
+      return this.$store.dispatch('ASK_FOR_IMAGE_PATH');
     },
 
     keyup(event) {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape') {
         this.setImageViewerVisible(false);
       }
     },
@@ -864,9 +853,7 @@ export default {
 
       // This method is also called from bus, so validate state before continuing.
       if (!isEnabled) {
-        throw new Error(
-          "Cannot switch language because spell checker is disabled!"
-        );
+        throw new Error('Cannot switch language because spell checker is disabled!');
       }
 
       spellchecker
@@ -875,8 +862,8 @@ export default {
           if (!langCode) {
             // Unable to switch language due to missing dictionary. The spell checker is now in an invalid state.
             notice.notify({
-              title: "Spelling",
-              type: "warning",
+              title: 'Spelling',
+              type: 'warning',
               message: `Unable to switch to language "${languageCode}". Requested language dictionary is missing.`,
             });
           }
@@ -886,8 +873,8 @@ export default {
           log.error(error);
 
           notice.notify({
-            title: "Spelling",
-            type: "error",
+            title: 'Spelling',
+            type: 'error',
             message: `Error while switching to "${languageCode}": ${error.message}`,
           });
         });
@@ -901,7 +888,7 @@ export default {
 
     openSpellcheckerLanguageCommand() {
       if (!isOsx) {
-        bus.$emit("show-command-palette", this.switchLanguageCommand);
+        bus.$emit('show-command-palette', this.switchLanguageCommand);
       }
     },
 
@@ -928,15 +915,12 @@ export default {
         return;
       }
 
-      if (
-        this.editor &&
-        (this.editor.hasFocus() || this.editor.contentState.selectedTableCells)
-      ) {
+      if (this.editor && (this.editor.hasFocus() || this.editor.contentState.selectedTableCells)) {
         this.editor.selectAll();
       } else {
         const activeElement = document.activeElement;
         const nodeName = activeElement.nodeName;
-        if (nodeName === "INPUT" || nodeName === "TEXTAREA") {
+        if (nodeName === 'INPUT' || nodeName === 'TEXTAREA') {
           activeElement.select();
         }
       }
@@ -957,34 +941,30 @@ export default {
 
     handleSearch(value, opt) {
       const searchMatches = this.editor.search(value, opt);
-      this.$store.dispatch("SEARCH", searchMatches);
+      this.$store.dispatch('SEARCH', searchMatches);
       this.scrollToHighlight();
     },
 
     handReplace(value, opt) {
       const searchMatches = this.editor.replace(value, opt);
-      this.$store.dispatch("SEARCH", searchMatches);
+      this.$store.dispatch('SEARCH', searchMatches);
     },
 
     handleUploadedImage(url, deletionUrl) {
       this.insertImage(url);
-      this.$store.dispatch("SHOW_IMAGE_DELETION_URL", deletionUrl);
+      this.$store.dispatch('SHOW_IMAGE_DELETION_URL', deletionUrl);
     },
 
     scrollToCursor(duration = 300) {
       this.$nextTick(() => {
         const { container } = this.editor;
         const { y } = this.editor.getSelection().cursorCoords;
-        animatedScrollTo(
-          container,
-          container.scrollTop + y - STANDAR_Y,
-          duration
-        );
+        animatedScrollTo(container, container.scrollTop + y - STANDAR_Y, duration);
       });
     },
 
     scrollToHighlight() {
-      return this.scrollToElement(".ag-highlight");
+      return this.scrollToElement('.ag-highlight');
     },
 
     scrollToHeader(slug) {
@@ -998,17 +978,13 @@ export default {
       if (anchor) {
         const { y } = anchor.getBoundingClientRect();
         const DURATION = 300;
-        animatedScrollTo(
-          container,
-          container.scrollTop + y - STANDAR_Y,
-          DURATION
-        );
+        animatedScrollTo(container, container.scrollTop + y - STANDAR_Y, DURATION);
       }
     },
 
     handleFindAction(action) {
       const searchMatches = this.editor.find(action);
-      this.$store.dispatch("SEARCH", searchMatches);
+      this.$store.dispatch('SEARCH', searchMatches);
       this.scrollToHighlight();
     },
 
@@ -1023,31 +999,29 @@ export default {
       const htmlToc = getHtmlToc(this.editor.getTOC(), options);
 
       switch (type) {
-        case "styledHtml": {
+        case 'styledHtml': {
           try {
             const content = await this.editor.exportStyledHTML({
-              title: htmlTitle || "",
+              title: htmlTitle || '',
               printOptimization: false,
               extraCss,
               toc: htmlToc,
             });
-            this.$store.dispatch("EXPORT", { type, content });
+            this.$store.dispatch('EXPORT', { type, content });
           } catch (err) {
-            log.error("Failed to export document:", err);
+            log.error('Failed to export document:', err);
             notice.notify({
-              title: `Printing/Exporting ${htmlTitle || "html"} failed`,
-              type: "error",
-              message:
-                err.message || "There is something wrong when exporting.",
+              title: `Printing/Exporting ${htmlTitle || 'html'} failed`,
+              type: 'error',
+              message: err.message || 'There is something wrong when exporting.',
             });
           }
           break;
         }
-        case "pdf": {
+        case 'pdf': {
           // NOTE: We need to set page size via Electron.
           try {
-            const { pageSize, pageSizeWidth, pageSizeHeight, isLandscape } =
-              options;
+            const { pageSize, pageSizeWidth, pageSizeHeight, isLandscape } = options;
             const pageOptions = {
               pageSize,
               pageSizeWidth,
@@ -1056,7 +1030,7 @@ export default {
             };
 
             const html = await this.editor.exportStyledHTML({
-              title: "",
+              title: '',
               printOptimization: true,
               extraCss,
               toc: htmlToc,
@@ -1065,24 +1039,23 @@ export default {
               headerFooterStyled,
             });
             this.printer.renderMarkdown(html, true);
-            this.$store.dispatch("EXPORT", { type, pageOptions });
+            this.$store.dispatch('EXPORT', { type, pageOptions });
           } catch (err) {
-            log.error("Failed to export document:", err);
+            log.error('Failed to export document:', err);
             notice.notify({
-              title: "Printing/Exporting failed",
-              type: "error",
-              message: `There is something wrong when export ${htmlTitle || "PDF"
-                }.`,
+              title: 'Printing/Exporting failed',
+              type: 'error',
+              message: `There is something wrong when export ${htmlTitle || 'PDF'}.`,
             });
             this.handlePrintServiceClearup();
           }
           break;
         }
-        case "print": {
+        case 'print': {
           // NOTE: Print doesn't support page size or orientation.
           try {
             const html = await this.editor.exportStyledHTML({
-              title: "",
+              title: '',
               printOptimization: true,
               extraCss,
               toc: htmlToc,
@@ -1091,14 +1064,13 @@ export default {
               headerFooterStyled,
             });
             this.printer.renderMarkdown(html, true);
-            this.$store.dispatch("PRINT_RESPONSE");
+            this.$store.dispatch('PRINT_RESPONSE');
           } catch (err) {
-            log.error("Failed to export document:", err);
+            log.error('Failed to export document:', err);
             notice.notify({
-              title: "Printing/Exporting failed",
-              type: "error",
-              message: `There is something wrong when print ${htmlTitle || ""
-                }.`,
+              title: 'Printing/Exporting failed',
+              type: 'error',
+              message: `There is something wrong when print ${htmlTitle || ''}.`,
             });
             this.handlePrintServiceClearup();
           }
@@ -1112,7 +1084,7 @@ export default {
     },
 
     handleEditParagraph(type) {
-      if (type === "table") {
+      if (type === 'table') {
         this.tableChecker = { rows: 4, columns: 3 };
         this.dialogTableVisible = true;
         this.$nextTick(() => {
@@ -1128,13 +1100,13 @@ export default {
       const { editor } = this;
       if (editor) {
         switch (type) {
-          case "duplicate": {
+          case 'duplicate': {
             return editor.duplicate();
           }
-          case "createParagraph": {
-            return editor.insertParagraph("after", "", true);
+          case 'createParagraph': {
+            return editor.insertParagraph('after', '', true);
           }
-          case "deleteParagraph": {
+          case 'deleteParagraph': {
             return editor.deleteParagraph();
           }
           default:
@@ -1173,7 +1145,7 @@ export default {
           if (history) {
             editor.setHistory(history);
           }
-          if (typeof markdown === "string") {
+          if (typeof markdown === 'string') {
             editor.setMarkdown(markdown, cursor, renderCursor);
           } else if (cursor) {
             editor.setCursor(cursor);
@@ -1200,7 +1172,7 @@ export default {
 
     handleScreenShot() {
       if (this.editor) {
-        document.execCommand("paste");
+        document.execCommand('paste');
       }
     },
   },

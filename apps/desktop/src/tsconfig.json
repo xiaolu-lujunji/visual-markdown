@@ -1,12 +1,18 @@
 {
   "compilerOptions": {
     "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
     "strict": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "baseUrl": ".",
     "paths": {
-      "api/*": ["../../../packages/api/src/*"]
+      "api/*": ["../../../packages/api/src/*"],
+      "markdown-core/*": ["../../../packages/markdown-core/src/*"]
     }
+  },
+  "vueCompilerOptions": {
+    "target": 2.7
   },
   "exclude": ["node_modules"]
 }

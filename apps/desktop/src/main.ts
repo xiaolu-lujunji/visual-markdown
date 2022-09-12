@@ -1,13 +1,14 @@
-import Vue from "vue";
-import VueElectron from "vue-electron";
-import sourceMapSupport from "source-map-support";
-import bootstrapRenderer from "./bootstrap";
-import VueRouter from "vue-router";
-import lang from "element-ui/lib/locale/lang/en";
-import locale from "element-ui/lib/locale";
-import axios from "./axios";
-import store from "./store";
-import "./assets/symbolIcon";
+import Vue from 'vue';
+import { createPinia, PiniaVuePlugin } from 'pinia';
+import VueElectron from 'vue-electron';
+import sourceMapSupport from 'source-map-support';
+import bootstrapRenderer from './bootstrap';
+import VueRouter from 'vue-router';
+import lang from 'element-ui/lib/locale/lang/en';
+import locale from 'element-ui/lib/locale';
+import axios from './axios';
+import store from './store';
+import './assets/symbolIcon';
 import {
   Dialog,
   Form,
@@ -33,19 +34,19 @@ import {
   Tabs,
   TabPane,
   Input,
-} from "element-ui";
-import services from "./services";
-import routes from "./router";
-import { addElementStyle } from "@/util/theme";
+} from 'element-ui';
+import services from './services';
+import routes from './router';
+import { addElementStyle } from '@/util/theme';
 
-import "./assets/styles/index.css";
-import "./assets/styles/printService.css";
+import './assets/styles/index.css';
+import './assets/styles/printService.css';
 
 // -----------------------------------------------
 
 // Decode source map in production - must be registered first
 sourceMapSupport.install({
-  environment: "node",
+  environment: 'node',
   handleUncaughtExceptions: false,
   hookRequire: false,
 });
@@ -60,6 +61,10 @@ addElementStyle();
 
 // Configure Vue
 locale.use(lang);
+
+Vue.use(PiniaVuePlugin);
+
+const pinia = createPinia();
 
 Vue.use(Dialog);
 Vue.use(Form);
@@ -93,7 +98,7 @@ Vue.http = Vue.prototype.$http = axios;
 Vue.config.productionTip = false;
 
 services.forEach((s) => {
-  Vue.prototype["$" + s.name] = s[s.name];
+  Vue.prototype['$' + s.name] = s[s.name];
 });
 
 const router = new VueRouter({
@@ -105,4 +110,5 @@ new Vue({
   store,
   router,
   template: '<router-view class="view"></router-view>',
-}).$mount("#app");
+  pinia,
+}).$mount('#app');

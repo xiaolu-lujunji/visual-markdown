@@ -219,15 +219,13 @@ const rendererConfig = {
       api: path.join(__dirname, '../../../packages/api/src'),
       common: path.join(__dirname, '../../../packages/common'),
       muya: path.join(__dirname, '../../../packages/muya'),
+      'markdown-core': path.join(__dirname, '../../../packages/markdown-core/src'),
       snapsvg: path.join(__dirname, '../../../packages/muya/lib/assets/libs/snap.svg-min.js'),
       vue$: 'vue/dist/vue.esm.js',
     },
     extensions: ['.ts', '.tsx', '.js', '.vue', '.json', '.css', '.node'],
   },
   target: 'electron-renderer',
-  experiments: {
-    topLevelAwait: true,
-  },
 };
 
 /**

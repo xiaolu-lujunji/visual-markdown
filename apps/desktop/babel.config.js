@@ -1,14 +1,14 @@
-const proposalClassProperties = require("@babel/plugin-proposal-class-properties");
-const syntaxClassProperties = require("@babel/plugin-syntax-class-properties");
-const transformRuntime = require("@babel/plugin-transform-runtime");
-const syntaxDynamicImport = require("@babel/plugin-syntax-dynamic-import");
-const functionBind = require("@babel/plugin-proposal-function-bind");
-const exportDefault = require("@babel/plugin-proposal-export-default-from");
-const isTanbul = require("babel-plugin-istanbul");
-const component = require("babel-plugin-component");
-const presetEnv = require("@babel/preset-env");
-const presetReact = require("@babel/preset-react");
-const presetTypescript = require("@babel/preset-typescript");
+const proposalClassProperties = require('@babel/plugin-proposal-class-properties');
+const syntaxClassProperties = require('@babel/plugin-syntax-class-properties');
+const transformRuntime = require('@babel/plugin-transform-runtime');
+const syntaxDynamicImport = require('@babel/plugin-syntax-dynamic-import');
+const functionBind = require('@babel/plugin-proposal-function-bind');
+const exportDefault = require('@babel/plugin-proposal-export-default-from');
+const isTanbul = require('babel-plugin-istanbul');
+const component = require('babel-plugin-component');
+const presetEnv = require('@babel/preset-env');
+const presetReact = require('@babel/preset-react');
+const presetTypescript = require('@babel/preset-typescript');
 
 const presetsHash = {
   test: [
@@ -36,18 +36,19 @@ const presetsHash = {
       {
         useBuiltIns: false,
         targets: {
-          electron: require("electron/package.json").version,
+          electron: require('electron/package.json').version,
           node: 16,
         },
       },
     ],
+    '@babel/preset-typescript',
+    'babel-preset-typescript-vue',
     [
-      "@babel/preset-react",
+      '@babel/preset-react',
       {
-        runtime: "automatic",
+        runtime: 'automatic',
       },
     ],
-    presetTypescript,
   ],
 };
 
@@ -63,14 +64,14 @@ module.exports = function (api) {
   const env = api.env();
   const presets = presetsHash[env];
 
-  if (env === "test") {
+  if (env === 'test') {
     plugins.push(isTanbul);
-  } else if (env === "renderer") {
+  } else if (env === 'renderer') {
     plugins.push([
       component,
       {
         style: false,
-        libraryName: "element-ui",
+        libraryName: 'element-ui',
       },
     ]);
   }

@@ -1,0 +1,32 @@
+{
+  "name": "markdown-core",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/mdast": "^3.0.10",
+    "@types/react": "^18.0.18",
+    "@types/unist": "^2.0.6",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "slate": "0.82.0",
+    "slate-react": "0.82.0",
+    "unified": "^10.1.2"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "slate": "0.82.0",
+    "slate-react": "0.82.0"
+  },
+  "dependencies": {
+    "remark-parse": "^10.0.1",
+    "unist-util-map": "^3.1.1"
+  }
+}
