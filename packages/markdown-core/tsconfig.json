@@ -5,7 +5,7 @@
     "esModuleInterop": true,
     "strict": true,
     "jsx": "react-jsx",
-    "lib": ["ESNext"]
+    "lib": ["ESNext", "DOM", "DOM.Iterable"]
   },
   "exclude": ["node_modules"]
 }

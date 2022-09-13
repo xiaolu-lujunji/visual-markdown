@@ -10,6 +10,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
+    "@types/is-hotkey": "^0.1.7",
+    "@types/lodash": "^4.14.185",
     "@types/mdast": "^3.0.10",
     "@types/react": "^18.0.18",
     "@types/unist": "^2.0.6",
@@ -26,6 +28,12 @@
     "slate-react": "0.82.0"
   },
   "dependencies": {
+    "@babel/core": "^7.17.7",
+    "@emotion/react": "^11.10.4",
+    "@emotion/styled": "^11.10.4",
+    "@mui/material": "^5.10.4",
+    "is-hotkey": "^0.2.0",
+    "lodash": "^4.17.21",
     "remark-parse": "^10.0.1",
     "unist-util-map": "^3.1.1"
   }

@@ -95,7 +95,7 @@ import { guessClipboardFilePath } from '@/util/clipboard';
 import { getCssForOptions, getHtmlToc } from '@/util/pdf';
 import { addCommonStyle, setEditorWidth } from '@/util/theme';
 
-// import "muya/themes/default.css";
+import "muya/themes/default.css";
 import '@/assets/themes/codemirror/one-dark.css';
 // import 'view-image/lib/imgViewer.css'
 import CloseIcon from '@/assets/icons/close.svg';
@@ -104,6 +104,7 @@ import React from 'react';
 import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 import Editable from 'markdown-core/editable';
+import withMarkdown from 'markdown-core/with-markdown';
 import './styles/github-markdown.css';
 import './editor.css';
 import { unified } from 'unified';
@@ -555,7 +556,7 @@ export default {
       //   });
       // }
 
-      const editor = withReact(createEditor());
+      const editor = withMarkdown(withReact(createEditor()));
 
       console.log(remarkCommonMark);
 

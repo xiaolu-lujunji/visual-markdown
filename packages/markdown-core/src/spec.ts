@@ -200,8 +200,9 @@ export interface Heading extends Parent {
   children: PhrasingContent[];
 }
 
-export interface ThematicBreak extends Node {
+export interface ThematicBreak {
   type: 'thematicBreak';
+  children: [{ text: '' }];
 }
 
 export interface Blockquote extends Parent {
