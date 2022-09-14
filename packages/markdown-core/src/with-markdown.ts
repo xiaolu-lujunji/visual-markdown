@@ -2,15 +2,18 @@ import { Range, Editor, Point, Transforms, Element, Path } from 'slate';
 import { isHeading } from './common';
 import type { BaseEditor, NodeMatch, Ancestor } from 'slate';
 import type { ReactEditor } from 'slate-react';
-import type { Heading, Blockquote } from './spec';
+import type { Heading, Blockquote, List } from './spec';
 
 const isBlockquote: NodeMatch<Ancestor> = (node) =>
   Element.isElement(node) && node.type === 'blockquote';
 
+const isList: NodeMatch<Ancestor> = (node) => Element.isElement(node) && node.type === 'list';
+
 export default function withMarkdown(editor: BaseEditor & ReactEditor) {
   const { isVoid, deleteBackward } = editor;
 
-  editor.isVoid = (element) => element.type === 'thematicBreak' || isVoid(element);
+  editor.isVoid = (element) =>
+    element.type === 'thematicBreak' || element.type === 'html' || isVoid(element);
 
   editor.deleteBackward = (unit) => {
     if (editor.selection && Range.isCollapsed(editor.selection)) {
@@ -43,6 +46,21 @@ export default function withMarkdown(editor: BaseEditor & ReactEditor) {
             { at: blockquotePath },
           );
           Transforms.removeNodes(editor, { at: Path.next(blockquotePath) });
+          return;
+        }
+      }
+
+      const listEntry = Editor.above<List>(editor, { match: isList });
+      if (listEntry) {
+        const [, listPath] = listEntry;
+        const start = Editor.start(editor, listPath);
+        if (Point.equals(editor.selection.anchor, start)) {
+          Transforms.insertNodes(
+            editor,
+            { type: 'paragraph', children: [{ text: '' }] },
+            { at: listPath },
+          );
+          Transforms.removeNodes(editor, { at: Path.next(listPath) });
           return;
         }
       }

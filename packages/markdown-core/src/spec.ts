@@ -177,24 +177,20 @@ export type PhrasingContent = PhrasingContentMap[keyof PhrasingContentMap];
 
 export type StaticPhrasingContent = StaticPhrasingContentMap[keyof StaticPhrasingContentMap];
 
-export interface Parent extends UnistParent {
-  children: Content[];
-}
-
 export interface Literal extends UnistLiteral {
   value: string;
 }
 
-export interface Root extends Parent {
+export interface Root {
   type: 'root';
 }
 
-export interface Paragraph extends Parent {
+export interface Paragraph {
   type: 'paragraph';
   children: PhrasingContent[];
 }
 
-export interface Heading extends Parent {
+export interface Heading {
   type: 'heading';
   depth: 1 | 2 | 3 | 4 | 5 | 6;
   children: PhrasingContent[];
@@ -205,12 +201,12 @@ export interface ThematicBreak {
   children: [{ text: '' }];
 }
 
-export interface Blockquote extends Parent {
+export interface Blockquote {
   type: 'blockquote';
   children: Array<BlockContent | DefinitionContent>;
 }
 
-export interface List extends Parent {
+export interface List {
   type: 'list';
   ordered?: boolean | null | undefined;
   start?: number | null | undefined;
@@ -218,31 +214,33 @@ export interface List extends Parent {
   children: ListContent[];
 }
 
-export interface ListItem extends Parent {
+export interface ListItem {
   type: 'listItem';
   checked?: boolean | null | undefined;
   spread?: boolean | null | undefined;
   children: Array<BlockContent | DefinitionContent>;
 }
 
-export interface Table extends Parent {
+export interface Table {
   type: 'table';
   align?: AlignType[] | null | undefined;
   children: TableContent[];
 }
 
-export interface TableRow extends Parent {
+export interface TableRow {
   type: 'tableRow';
   children: RowContent[];
 }
 
-export interface TableCell extends Parent {
+export interface TableCell {
   type: 'tableCell';
   children: PhrasingContent[];
 }
 
 export interface HTML extends Literal {
   type: 'html';
+  inEditing: boolean;
+  children: [{ text: '' }];
 }
 
 export interface Code extends Literal {
@@ -259,27 +257,26 @@ export interface Definition extends Node, Association, Resource {
   type: 'definition';
 }
 
-export interface FootnoteDefinition extends Parent, Association {
+export interface FootnoteDefinition extends Association {
   type: 'footnoteDefinition';
   children: Array<BlockContent | DefinitionContent>;
 }
 
 export interface Text {
-  type: 'text';
   text: string;
 }
 
-export interface Emphasis extends Parent {
+export interface Emphasis {
   type: 'emphasis';
   children: PhrasingContent[];
 }
 
-export interface Strong extends Parent {
+export interface Strong {
   type: 'strong';
   children: PhrasingContent[];
 }
 
-export interface Delete extends Parent {
+export interface Delete {
   type: 'delete';
   children: PhrasingContent[];
 }
@@ -292,7 +289,7 @@ export interface Break extends Node {
   type: 'break';
 }
 
-export interface Link extends Parent, Resource {
+export interface Link extends Resource {
   type: 'link';
   children: StaticPhrasingContent[];
 }
@@ -301,7 +298,7 @@ export interface Image extends Node, Resource, Alternative {
   type: 'image';
 }
 
-export interface LinkReference extends Parent, Reference {
+export interface LinkReference extends Reference {
   type: 'linkReference';
   children: StaticPhrasingContent[];
 }
@@ -310,7 +307,7 @@ export interface ImageReference extends Node, Reference, Alternative {
   type: 'imageReference';
 }
 
-export interface Footnote extends Parent {
+export interface Footnote {
   type: 'footnote';
   children: PhrasingContent[];
 }

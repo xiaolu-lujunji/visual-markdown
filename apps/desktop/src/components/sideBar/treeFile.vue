@@ -86,7 +86,7 @@ export default defineComponent({
     :style="{ 'padding-left': `${depth * 20 + 20}px`, opacity: file.isMarkdown ? 1 : 0.75 }"
     :class="[{ current: selected, active }]"
     @click="handleClick"
-    @context-menu.stop="handleContextMenu"
+    @contextmenu.stop="handleContextMenu"
   >
     <file-icon :name="file.name"></file-icon>
     <input

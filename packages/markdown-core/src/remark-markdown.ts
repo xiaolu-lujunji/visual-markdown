@@ -13,9 +13,13 @@ const remarkSlate: Plugin<void[], Root, Root> = function remarkSlate() {
           return { text: node.value };
         case 'thematicBreak':
           return { type: node.type, children: [{ text: '' }] };
+        case 'html':
+          return { type: node.type, value: node.value, inEditing: false, children: [{ text: '' }] };
         case 'paragraph':
         case 'heading':
         case 'blockquote':
+        case 'list':
+        case 'listItem':
         default:
           return omit(node, 'position');
       }

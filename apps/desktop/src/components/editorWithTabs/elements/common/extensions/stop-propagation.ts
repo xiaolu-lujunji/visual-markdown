@@ -1,14 +1,3 @@
-import { EditorView } from "@codemirror/view";
-
-const stopPropagation = EditorView.domEventHandlers({
-  beforeinput: (event) => {
-    event.stopPropagation();
-    return false;
-  },
-  keydown: (event) => {
-    event.stopPropagation();
-    return false;
-  },
-});
+import { EditorView } from '@codemirror/view';
 
 export default stopPropagation;
