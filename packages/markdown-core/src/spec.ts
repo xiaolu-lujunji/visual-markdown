@@ -79,11 +79,8 @@ export interface DefinitionContentMap {
  */
 export interface StaticPhrasingContentMap {
   text: Text;
-  emphasis: Emphasis;
-  strong: Strong;
   delete: Delete;
   html: HTML;
-  inlinecode: InlineCode;
   break: Break;
   image: Image;
   imagereference: ImageReference;
@@ -239,7 +236,7 @@ export interface TableCell {
 
 export interface HTML extends Literal {
   type: 'html';
-  inEditing: boolean;
+  autoFocus?: boolean;
   children: [{ text: '' }];
 }
 
@@ -247,6 +244,8 @@ export interface Code extends Literal {
   type: 'code';
   lang?: string | null | undefined;
   meta?: string | null | undefined;
+  autoFocus?: boolean;
+  children: [{ text: '' }];
 }
 
 export interface YAML extends Literal {
@@ -263,26 +262,15 @@ export interface FootnoteDefinition extends Association {
 }
 
 export interface Text {
+  emphasis?: boolean;
+  strong?: boolean;
+  inlineCode?: boolean;
   text: string;
-}
-
-export interface Emphasis {
-  type: 'emphasis';
-  children: PhrasingContent[];
-}
-
-export interface Strong {
-  type: 'strong';
-  children: PhrasingContent[];
 }
 
 export interface Delete {
   type: 'delete';
   children: PhrasingContent[];
-}
-
-export interface InlineCode extends Literal {
-  type: 'inlineCode';
 }
 
 export interface Break extends Node {

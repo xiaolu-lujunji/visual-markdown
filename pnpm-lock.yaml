@@ -382,7 +382,9 @@ importers:
       '@babel/core': ^7.17.7
       '@codemirror/autocomplete': ^6.2.0
       '@codemirror/commands': ^6.1.0
+      '@codemirror/lang-css': ^6.0.0
       '@codemirror/lang-html': ^6.1.1
+      '@codemirror/lang-javascript': ^6.0.2
       '@codemirror/language': ^6.2.1
       '@codemirror/lint': ^6.0.0
       '@codemirror/search': ^6.2.0
@@ -390,6 +392,7 @@ importers:
       '@codemirror/view': ^6.2.2
       '@emotion/react': ^11.10.4
       '@emotion/styled': ^11.10.4
+      '@mui/icons-material': ^5.10.3
       '@mui/material': ^5.10.4
       '@types/dompurify': ^2.3.4
       '@types/is-hotkey': ^0.1.7
@@ -412,7 +415,9 @@ importers:
       '@babel/core': 7.19.0
       '@codemirror/autocomplete': 6.2.0_uvjwptkzsluqzouft7euoo7zsa
       '@codemirror/commands': 6.1.0
+      '@codemirror/lang-css': 6.0.0_@codemirror+view@6.2.2
       '@codemirror/lang-html': 6.1.1
+      '@codemirror/lang-javascript': 6.0.2
       '@codemirror/language': 6.2.1
       '@codemirror/lint': 6.0.0
       '@codemirror/search': 6.2.0
@@ -420,6 +425,7 @@ importers:
       '@codemirror/view': 6.2.2
       '@emotion/react': 11.10.4_p6fq7jdyqwnykllwwkx4b6uid4
       '@emotion/styled': 11.10.4_lxst47gwu5lqjtx2guwl7nfnjm
+      '@mui/icons-material': 5.10.3_dtruv572645qlhu5xokhjjhjka
       '@mui/material': 5.10.4_vbxcdxy3bftsefaguotlgalomu
       dompurify: 2.4.0
       html-react-parser: 3.0.4_react@18.2.0
@@ -2723,6 +2729,23 @@ packages:
 
   /@mui/core-downloads-tracker/5.10.4:
     resolution: {integrity: sha512-VGekVa9dleJ+ii47+gXvKUV5a11T0nsjXN8bk5NqiJRQWRCAhbTHgsfZuctNcMeLW9FSf2gu6U0k2U6rhABKcA==}
+    dev: false
+
+  /@mui/icons-material/5.10.3_dtruv572645qlhu5xokhjjhjka:
+    resolution: {integrity: sha512-o0kbUlsWCBtCE0wP33cGKbyryCh7kpm2EECYMPDmWrLhbA+HUODXIdhiTFS26szp2xXo9HY1lEx0ufeJ+tddYw==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      '@mui/material': ^5.0.0
+      '@types/react': ^17.0.0 || ^18.0.0
+      react: ^17.0.0 || ^18.0.0
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+    dependencies:
+      '@babel/runtime': 7.19.0
+      '@mui/material': 5.10.4_vbxcdxy3bftsefaguotlgalomu
+      '@types/react': 18.0.18
+      react: 18.2.0
     dev: false
 
   /@mui/material/5.10.4_6xnkn2aqnlmdvuspwqrjexfduy:

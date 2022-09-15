@@ -13,7 +13,10 @@ export default function withMarkdown(editor: BaseEditor & ReactEditor) {
   const { isVoid, deleteBackward } = editor;
 
   editor.isVoid = (element) =>
-    element.type === 'thematicBreak' || element.type === 'html' || isVoid(element);
+    element.type === 'thematicBreak' ||
+    element.type === 'html' ||
+    element.type === 'code' ||
+    isVoid(element);
 
   editor.deleteBackward = (unit) => {
     if (editor.selection && Range.isCollapsed(editor.selection)) {

@@ -11,10 +11,17 @@ const remarkSlate: Plugin<void[], Root, Root> = function remarkSlate() {
       switch (node.type) {
         case 'text':
           return { text: node.value };
+        case 'emphasis':
+        case 'strong':
+          const newNode = { text: node.children[0].value, [node.type]: true };
+          delete node.children;
+          return newNode;
+        case 'inlineCode':
+          return { text: node.value, inlineCode: true };
         case 'thematicBreak':
-          return { type: node.type, children: [{ text: '' }] };
         case 'html':
-          return { type: node.type, value: node.value, inEditing: false, children: [{ text: '' }] };
+        case 'code':
+          return { ...omit(node, 'position'), children: [{ text: '' }] };
         case 'paragraph':
         case 'heading':
         case 'blockquote':
