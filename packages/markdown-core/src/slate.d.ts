@@ -10,12 +10,22 @@ import type {
   ListItem,
   HTML,
   Code,
+  Link,
 } from './spec';
 
 declare module 'slate' {
   interface CustomTypes {
     Editor: BaseEditor & ReactEditor;
-    Element: Paragraph | Heading | ThematicBreak | Blockquote | List | ListItem | HTML | Code;
+    Element:
+      | Paragraph
+      | Heading
+      | ThematicBreak
+      | Blockquote
+      | List
+      | ListItem
+      | HTML
+      | Code
+      | Link;
     Text: Text;
   }
 }

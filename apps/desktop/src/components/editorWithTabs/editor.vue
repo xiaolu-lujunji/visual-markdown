@@ -111,6 +111,7 @@ import './editor.css';
 import { unified } from 'unified';
 import type { Descendant } from 'slate';
 import { getImageInfo } from './get-image-info';
+import { openExternal } from 'api/shell';
 
 const STANDAR_Y = 320;
 
@@ -580,6 +581,7 @@ export default {
               Editable,
               {
                 rewriteImageSrc: (src: string) => getImageInfo(src).src,
+                openLink: (href: string) => openExternal(href),
               },
               null,
             ),

@@ -8,13 +8,13 @@ const linkCtrl = (ContentState) => {
     const { text } = block;
     let anchor;
     switch (token.type) {
-      case "html_tag":
+      case 'html_tag':
         anchor = token.content;
         break;
-      case "link":
+      case 'link':
         anchor = token.href;
         break;
-      case "text": {
+      case 'text': {
         const match = /^\[(.+?)\]/.exec(token.raw);
         if (match && match[1]) {
           anchor = match[1];
@@ -23,13 +23,10 @@ const linkCtrl = (ContentState) => {
       }
     }
     if (!anchor) {
-      console.error("Can not find anchor when unlink");
+      console.error('Can not find anchor when unlink');
       return;
     }
-    block.text =
-      text.substring(0, token.range.start) +
-      anchor +
-      text.substring(token.range.end);
+    block.text = text.substring(0, token.range.start) + anchor + text.substring(token.range.end);
     this.cursor = {
       start: {
         key,

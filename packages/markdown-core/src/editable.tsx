@@ -3,7 +3,6 @@ import { Range, Editor, Element, Node, Transforms, Path, Point, Text } from 'sla
 import {
   Editable as EditableBase,
   DefaultElement,
-  DefaultLeaf,
   useSlate,
   useSlateStatic,
   useFocused,
@@ -18,6 +17,8 @@ import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import HTML from './elements/html';
 import Code from './elements/code';
+import Link from './elements/link';
+import ToggleLink from './components/toggle-link';
 import styled from '@mui/material/styles/styled';
 import isHotkey from 'is-hotkey';
 import { isHeading } from './common';
@@ -91,12 +92,17 @@ export const RewriteImageSrcContext =
   // @ts-ignore
   React.createContext<React.MutableRefObject<((src: string) => string) | undefined>>();
 
+export const OpenLinkContext =
+  // @ts-ignore
+  React.createContext<React.MutableRefObject<((href: string) => string) | undefined>>();
+
 export interface EditableProps {
   rewriteImageSrc?: (src: string) => string;
+  openLink?: (href: string) => string;
 }
 
 export default function Editable(props: EditableProps) {
-  const { rewriteImageSrc } = props;
+  const { rewriteImageSrc, openLink } = props;
 
   const [anchorPosition, setAnchorPosition] = React.useState<null | { left: number; top: number }>(
     null,
@@ -104,6 +110,9 @@ export default function Editable(props: EditableProps) {
 
   const rewriteImageSrcRef = React.useRef(rewriteImageSrc);
   rewriteImageSrcRef.current = rewriteImageSrc;
+
+  const openLinkRef = React.useRef(openLink);
+  openLinkRef.current = openLink;
 
   const editor = useSlateStatic();
   const inFocus = useFocused();
@@ -136,6 +145,8 @@ export default function Editable(props: EditableProps) {
         return <HTML {...props} />;
       case 'code':
         return <Code {...props} />;
+      case 'link':
+        return <Link {...props} />;
       default:
         return <DefaultElement {...props} />;
     }
@@ -338,35 +349,38 @@ export default function Editable(props: EditableProps) {
 
   return (
     <RewriteImageSrcContext.Provider value={rewriteImageSrcRef}>
-      <StyledEditableBase
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-        onKeyDown={handleKeyDown}
-        onContextMenu={handleContextMenu}
-      />
-      <Popover
-        open={Boolean(anchorPosition)}
-        anchorReference="anchorPosition"
-        anchorPosition={anchorPosition ?? { left: 0, top: 0 }}
-        onClose={() => setAnchorPosition(null)}
-      >
-        <FormatButton format="strong" aria-label="bold">
-          <FormatBoldIcon />
-        </FormatButton>
-        <FormatButton format="emphasis" aria-label="italic">
-          <FormatItalicIcon />
-        </FormatButton>
-        <FormatButton format="inlineCode" aria-label="code">
-          <CodeIcon />
-        </FormatButton>
-        {/* <FormatButton value="underlined" aria-label="underlined">
+      <OpenLinkContext.Provider value={openLinkRef}>
+        <StyledEditableBase
+          renderElement={renderElement}
+          renderLeaf={renderLeaf}
+          onKeyDown={handleKeyDown}
+          onContextMenu={handleContextMenu}
+        />
+        <Popover
+          open={Boolean(anchorPosition)}
+          anchorReference="anchorPosition"
+          anchorPosition={anchorPosition ?? { left: 0, top: 0 }}
+          onClose={() => setAnchorPosition(null)}
+        >
+          <FormatButton format="strong" aria-label="bold">
+            <FormatBoldIcon />
+          </FormatButton>
+          <FormatButton format="emphasis" aria-label="italic">
+            <FormatItalicIcon />
+          </FormatButton>
+          <FormatButton format="inlineCode" aria-label="code">
+            <CodeIcon />
+          </FormatButton>
+          <ToggleLink />
+          {/* <FormatButton value="underlined" aria-label="underlined">
           <FormatUnderlinedIcon />
         </FormatButton> */}
-        {/* <FormatButton value="color" aria-label="color" disabled>
+          {/* <FormatButton value="color" aria-label="color" disabled>
           <FormatColorFillIcon />
           <ArrowDropDownIcon />
         </FormatButton> */}
-      </Popover>
+        </Popover>
+      </OpenLinkContext.Provider>
     </RewriteImageSrcContext.Provider>
   );
 }

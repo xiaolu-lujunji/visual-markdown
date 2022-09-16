@@ -27,6 +27,7 @@ const remarkSlate: Plugin<void[], Root, Root> = function remarkSlate() {
         case 'blockquote':
         case 'list':
         case 'listItem':
+        case 'link':
         default:
           return omit(node, 'position');
       }

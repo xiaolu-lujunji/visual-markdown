@@ -10,13 +10,15 @@ const isBlockquote: NodeMatch<Ancestor> = (node) =>
 const isList: NodeMatch<Ancestor> = (node) => Element.isElement(node) && node.type === 'list';
 
 export default function withMarkdown(editor: BaseEditor & ReactEditor) {
-  const { isVoid, deleteBackward } = editor;
+  const { isVoid, isInline, deleteBackward } = editor;
 
   editor.isVoid = (element) =>
     element.type === 'thematicBreak' ||
     element.type === 'html' ||
     element.type === 'code' ||
     isVoid(element);
+
+  editor.isInline = (element) => element.type === 'link' || isInline(element);
 
   editor.deleteBackward = (unit) => {
     if (editor.selection && Range.isCollapsed(editor.selection)) {
