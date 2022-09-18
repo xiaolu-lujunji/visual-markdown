@@ -1,10 +1,12 @@
+import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import { map } from 'unist-util-map';
 import omit from 'lodash/omit';
 import type { Plugin } from 'unified';
 import type { Root } from 'mdast';
+import type { Descendant } from 'slate';
 
-const remarkSlate: Plugin<void[], Root, Root> = function remarkSlate() {
+const slateCompile: Plugin<void[], Root, any> = function slateCompile() {
   this.Compiler = function Compiler(tree: Root) {
     // @ts-ignore
     return map(tree, (node) => {
@@ -35,6 +37,12 @@ const remarkSlate: Plugin<void[], Root, Root> = function remarkSlate() {
   };
 };
 
-const remarkMarkdown = [remarkParse, remarkSlate];
+const processor = unified().use(remarkParse).use(slateCompile);
 
-export default remarkMarkdown;
+export default function fromMarkdown(markdown: string): Descendant[] {
+  const vFile = processor.processSync(markdown);
+  if (vFile.result.children.length === 0) {
+    return { type: 'paragraph', children: [{ text: '' }] };
+  }
+  return vFile.result.children;
+}

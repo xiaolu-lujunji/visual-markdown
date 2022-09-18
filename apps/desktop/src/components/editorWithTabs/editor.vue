@@ -104,7 +104,8 @@ import React from 'react';
 import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
 import Editable from 'markdown-core/editable';
-import remarkMarkdown from 'markdown-core/remark-markdown';
+import fromMarkdown from 'markdown-core/serializing/from-markdown';
+import toMarkdown from 'markdown-core/serializing/to-markdown';
 import withMarkdown from 'markdown-core/with-markdown';
 import './styles/github-markdown.css';
 import './editor.css';
@@ -560,12 +561,7 @@ export default {
 
       const editor = withMarkdown(withReact(createEditor()));
 
-      const processor = unified().use(remarkMarkdown);
-      const tree = processor.processSync(this.markdown);
-      let value = tree.result.children as Descendant[];
-      if (value.length === 0) {
-        value = [{ type: 'paragraph', children: [{ text: '' }] }];
-      }
+      const value = fromMarkdown(this.markdown);
 
       console.log(value);
 
@@ -576,7 +572,14 @@ export default {
           {},
           React.createElement(
             Slate,
-            { editor, value },
+            {
+              editor,
+              value,
+              onChange: (value) => {
+                const markdown = toMarkdown({ type: 'root', children: value });
+                this.$store.dispatch('LISTEN_FOR_CONTENT_CHANGE', { markdown });
+              },
+            },
             React.createElement(
               Editable,
               {
@@ -643,14 +646,6 @@ export default {
       //   this.openSpellcheckerLanguageCommand
       // )
       // bus.$on('replace-misspelling', this.replaceMisspelling)
-
-      // this.editor.on('change', changes => {
-      //   // WORKAROUND: "id: 'muya'"
-      //   this.$store.dispatch(
-      //     'LISTEN_FOR_CONTENT_CHANGE',
-      //     Object.assign(changes, { id: 'muya' })
-      //   )
-      // })
 
       // this.editor.on('format-click', ({ event, formatType, data }) => {
       //   const ctrlOrMeta = (isOsx && event.metaKey) || (!isOsx && event.ctrlKey)
