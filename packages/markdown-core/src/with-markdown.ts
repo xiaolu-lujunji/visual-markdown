@@ -21,55 +21,54 @@ export default function withMarkdown(editor: BaseEditor & ReactEditor) {
   editor.isInline = (element) => element.type === 'link' || isInline(element);
 
   editor.deleteBackward = (unit) => {
-    if (editor.selection && Range.isCollapsed(editor.selection)) {
-      const headingEntry = Editor.above<Heading>(editor, {
-        match: isHeading,
-      });
-      if (headingEntry) {
-        const [, headingPath] = headingEntry;
-        const start = Editor.start(editor, headingPath);
-        if (Point.equals(editor.selection.anchor, start)) {
-          Transforms.setNodes(
-            editor,
-            { type: 'paragraph' },
-            {
-              at: headingPath,
-            },
-          );
-          return;
-        }
-      }
-
-      const blockquoteEntry = Editor.above<Blockquote>(editor, { match: isBlockquote });
-      if (blockquoteEntry) {
-        const [, blockquotePath] = blockquoteEntry;
-        const start = Editor.start(editor, blockquotePath);
-        if (Point.equals(editor.selection.anchor, start)) {
-          Transforms.insertNodes(
-            editor,
-            { type: 'paragraph', children: [{ text: '' }] },
-            { at: blockquotePath },
-          );
-          Transforms.removeNodes(editor, { at: Path.next(blockquotePath) });
-          return;
-        }
-      }
-
-      const listEntry = Editor.above<List>(editor, { match: isList });
-      if (listEntry) {
-        const [, listPath] = listEntry;
-        const start = Editor.start(editor, listPath);
-        if (Point.equals(editor.selection.anchor, start)) {
-          Transforms.insertNodes(
-            editor,
-            { type: 'paragraph', children: [{ text: '' }] },
-            { at: listPath },
-          );
-          Transforms.removeNodes(editor, { at: Path.next(listPath) });
-          return;
-        }
+    const headingEntry = Editor.above<Heading>(editor, {
+      match: isHeading,
+    });
+    if (headingEntry) {
+      const [, headingPath] = headingEntry;
+      const start = Editor.start(editor, headingPath);
+      if (Point.equals(editor.selection!.anchor, start)) {
+        Transforms.setNodes(
+          editor,
+          { type: 'paragraph' },
+          {
+            at: headingPath,
+          },
+        );
+        return;
       }
     }
+
+    const blockquoteEntry = Editor.above<Blockquote>(editor, { match: isBlockquote });
+    if (blockquoteEntry) {
+      const [, blockquotePath] = blockquoteEntry;
+      const start = Editor.start(editor, blockquotePath);
+      if (Point.equals(editor.selection!.anchor, start)) {
+        Transforms.insertNodes(
+          editor,
+          { type: 'paragraph', children: [{ text: '' }] },
+          { at: blockquotePath },
+        );
+        Transforms.removeNodes(editor, { at: Path.next(blockquotePath) });
+        return;
+      }
+    }
+
+    const listEntry = Editor.above<List>(editor, { match: isList });
+    if (listEntry) {
+      const [, listPath] = listEntry;
+      const start = Editor.start(editor, listPath);
+      if (Point.equals(editor.selection!.anchor, start)) {
+        Transforms.insertNodes(
+          editor,
+          { type: 'paragraph', children: [{ text: '' }] },
+          { at: listPath },
+        );
+        Transforms.removeNodes(editor, { at: Path.next(listPath) });
+        return;
+      }
+    }
+
     deleteBackward(unit);
   };
 
