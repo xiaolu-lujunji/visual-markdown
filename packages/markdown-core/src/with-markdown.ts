@@ -1,4 +1,4 @@
-import { Range, Editor, Point, Transforms, Element, Path } from 'slate';
+import { Editor, Point, Transforms, Element, Path } from 'slate';
 import { isHeading } from './common';
 import type { BaseEditor, NodeMatch, Ancestor } from 'slate';
 import type { ReactEditor } from 'slate-react';

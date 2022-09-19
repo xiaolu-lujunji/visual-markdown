@@ -15,6 +15,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
 import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import HeadingElement from './elements/heading';
 import HTML from './elements/html';
 import Code from './elements/code';
 import Link from './elements/link';
@@ -123,7 +124,7 @@ export default function Editable(props: EditableProps) {
       case 'paragraph':
         return <p {...attributes}>{children}</p>;
       case 'heading':
-        return React.createElement(`h${element.depth}`, attributes, children);
+        return <HeadingElement {...props} />;
       case 'thematicBreak':
         return (
           <div {...attributes} contentEditable={false}>
