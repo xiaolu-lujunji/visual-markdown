@@ -42,7 +42,7 @@ const processor = unified().use(remarkParse).use(slateCompile);
 export default function fromMarkdown(markdown: string): Descendant[] {
   const vFile = processor.processSync(markdown);
   if (vFile.result.children.length === 0) {
-    return { type: 'paragraph', children: [{ text: '' }] };
+    return [{ type: 'paragraph', children: [{ text: '' }] }];
   }
   return vFile.result.children;
 }
