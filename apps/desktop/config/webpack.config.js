@@ -219,7 +219,7 @@ const rendererConfig = {
       api: path.join(__dirname, '../../../packages/api/src'),
       common: path.join(__dirname, '../../../packages/common'),
       muya: path.join(__dirname, '../../../packages/muya'),
-      'markdown-core': path.join(__dirname, '../../../packages/markdown-core/src'),
+      editor: path.join(__dirname, '../../../packages/editor/src'),
       snapsvg: path.join(__dirname, '../../../packages/muya/lib/assets/libs/snap.svg-min.js'),
       vue$: 'vue/dist/vue.esm.js',
     },

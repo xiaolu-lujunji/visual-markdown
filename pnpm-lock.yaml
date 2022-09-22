@@ -377,7 +377,7 @@ importers:
     devDependencies:
       electron: 17.4.11
 
-  packages/markdown-core:
+  packages/editor:
     specifiers:
       '@babel/core': ^7.17.7
       '@codemirror/autocomplete': ^6.2.0
@@ -399,6 +399,7 @@ importers:
       '@types/lodash': ^4.14.185
       '@types/mdast': ^3.0.10
       '@types/react': ^18.0.18
+      '@types/react-dom': ^18.0.6
       '@types/unist': ^2.0.6
       dompurify: ^2.4.0
       html-react-parser: ^3.0.4
@@ -441,6 +442,7 @@ importers:
       '@types/lodash': 4.14.185
       '@types/mdast': 3.0.10
       '@types/react': 18.0.18
+      '@types/react-dom': 18.0.6
       '@types/unist': 2.0.6
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0

@@ -1,30 +1,15 @@
 import React from 'react';
-import { Range, Editor, Element, Node, Transforms, Path, Point, Text } from 'slate';
-import {
-  Editable as EditableBase,
-  DefaultElement,
-  useSlate,
-  useSlateStatic,
-  useFocused,
-} from 'slate-react';
-import Popover from '@mui/material/Popover';
-import ToggleButton from '@mui/material/ToggleButton';
-import FormatBoldIcon from '@mui/icons-material/FormatBold';
-import FormatItalicIcon from '@mui/icons-material/FormatItalic';
-import CodeIcon from '@mui/icons-material/Code';
-import FormatUnderlinedIcon from '@mui/icons-material/FormatUnderlined';
-import FormatColorFillIcon from '@mui/icons-material/FormatColorFill';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import { Range, Editor, Element, Node, Transforms, Path, Point } from 'slate';
+import { Editable as EditableBase, DefaultElement, useSlateStatic } from 'slate-react';
 import HeadingElement from './elements/heading';
 import HTML from './elements/html';
 import Code from './elements/code';
 import Link from './elements/link';
-import ToggleLink from './components/toggle-link';
 import styled from '@mui/material/styles/styled';
 import isHotkey from 'is-hotkey';
 import { isHeading } from './common';
-import type { BaseEditor, NodeMatch, Ancestor } from 'slate';
-import type { ReactEditor, RenderElementProps, RenderLeafProps } from 'slate-react';
+import type { NodeMatch, Ancestor } from 'slate';
+import type { RenderElementProps, RenderLeafProps } from 'slate-react';
 import type { Paragraph, Heading } from './spec';
 
 const HEADING_REG = /^ {0,3}(#{1,6})$/;
@@ -42,48 +27,6 @@ const isBacktick = isHotkey('`');
 
 const isParagraph: NodeMatch<Ancestor> = (node) =>
   Element.isElement(node) && node.type === 'paragraph';
-
-const isFormatActive = (
-  editor: BaseEditor & ReactEditor,
-  format: 'emphasis' | 'strong' | 'inlineCode',
-) => {
-  const [match] = Editor.nodes(editor, {
-    match: (node) => Text.isText(node) && node[format] === true,
-    mode: 'all',
-  });
-  return !!match;
-};
-
-const toggleFormat = (
-  editor: BaseEditor & ReactEditor,
-  format: 'emphasis' | 'strong' | 'inlineCode',
-) => {
-  const isActive = isFormatActive(editor, format);
-  Transforms.setNodes(
-    editor,
-    { [format]: isActive ? undefined : true },
-    { match: Text.isText, split: true },
-  );
-};
-
-interface FormatButtonProps {
-  format: 'emphasis' | 'strong' | 'inlineCode';
-  children?: React.ReactNode;
-}
-
-const FormatButton = (props: FormatButtonProps) => {
-  const { format, children } = props;
-  const editor = useSlate();
-  return (
-    <ToggleButton
-      value={format}
-      selected={isFormatActive(editor, format)}
-      onChange={() => toggleFormat(editor, format)}
-    >
-      {children}
-    </ToggleButton>
-  );
-};
 
 const StyledEditableBase = styled(EditableBase)({
   padding: 45,
@@ -105,10 +48,6 @@ export interface EditableProps {
 export default function Editable(props: EditableProps) {
   const { rewriteImageSrc, openLink } = props;
 
-  const [anchorPosition, setAnchorPosition] = React.useState<null | { left: number; top: number }>(
-    null,
-  );
-
   const rewriteImageSrcRef = React.useRef(rewriteImageSrc);
   rewriteImageSrcRef.current = rewriteImageSrc;
 
@@ -116,7 +55,6 @@ export default function Editable(props: EditableProps) {
   openLinkRef.current = openLink;
 
   const editor = useSlateStatic();
-  const inFocus = useFocused();
 
   const renderElement = React.useCallback((props: RenderElementProps) => {
     const { element, attributes, children } = props;
@@ -321,32 +259,7 @@ export default function Editable(props: EditableProps) {
     }
   }, []);
 
-  const handleContextMenu: React.MouseEventHandler<HTMLDivElement> = (event) => {
-    event.preventDefault();
-
-    const { selection } = editor;
-    if (
-      !selection ||
-      !inFocus ||
-      Range.isCollapsed(selection) ||
-      Editor.string(editor, selection) === ''
-    ) {
-      return;
-    }
-
-    const domSelection = window.getSelection();
-    if (domSelection) {
-      const domRange = domSelection.getRangeAt(0);
-      const rect = domRange.getBoundingClientRect();
-
-      setAnchorPosition({
-        top: rect.top + window.pageYOffset,
-        left: rect.left + window.pageXOffset + rect.width / 2,
-      });
-    }
-  };
-
-  console.log('editable update');
+  console.log('render editable');
 
   return (
     <RewriteImageSrcContext.Provider value={rewriteImageSrcRef}>
@@ -355,32 +268,7 @@ export default function Editable(props: EditableProps) {
           renderElement={renderElement}
           renderLeaf={renderLeaf}
           onKeyDown={handleKeyDown}
-          onContextMenu={handleContextMenu}
         />
-        <Popover
-          open={Boolean(anchorPosition)}
-          anchorReference="anchorPosition"
-          anchorPosition={anchorPosition ?? { left: 0, top: 0 }}
-          onClose={() => setAnchorPosition(null)}
-        >
-          <FormatButton format="strong" aria-label="bold">
-            <FormatBoldIcon />
-          </FormatButton>
-          <FormatButton format="emphasis" aria-label="italic">
-            <FormatItalicIcon />
-          </FormatButton>
-          <FormatButton format="inlineCode" aria-label="code">
-            <CodeIcon />
-          </FormatButton>
-          <ToggleLink />
-          {/* <FormatButton value="underlined" aria-label="underlined">
-          <FormatUnderlinedIcon />
-        </FormatButton> */}
-          {/* <FormatButton value="color" aria-label="color" disabled>
-          <FormatColorFillIcon />
-          <ArrowDropDownIcon />
-        </FormatButton> */}
-        </Popover>
       </OpenLinkContext.Provider>
     </RewriteImageSrcContext.Provider>
   );

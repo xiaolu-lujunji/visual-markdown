@@ -103,12 +103,10 @@ import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
-import Editable from 'markdown-core/editable';
-import fromMarkdown from 'markdown-core/serializing/from-markdown';
-import toMarkdown from 'markdown-core/serializing/to-markdown';
-import withMarkdown from 'markdown-core/with-markdown';
-import './styles/github-markdown.css';
-import './editor.css';
+import Editor from 'editor';
+import fromMarkdown from 'editor/serializing/from-markdown';
+import toMarkdown from 'editor/serializing/to-markdown';
+import withMarkdown from 'editor/with-markdown';
 import { unified } from 'unified';
 import type { Descendant } from 'slate';
 import { getImageInfo } from './get-image-info';
@@ -571,7 +569,7 @@ export default {
           React.StrictMode,
           {},
           React.createElement(
-            Slate,
+            Editor,
             {
               editor,
               value,
@@ -580,14 +578,14 @@ export default {
                 this.$store.dispatch('LISTEN_FOR_CONTENT_CHANGE', { markdown });
               },
             },
-            React.createElement(
-              Editable,
-              {
-                rewriteImageSrc: (src: string) => getImageInfo(src).src,
-                openLink: (href: string) => openExternal(href),
-              },
-              null,
-            ),
+            // React.createElement(
+            //   Editable,
+            //   {
+            //     rewriteImageSrc: (src: string) => getImageInfo(src).src,
+            //     openLink: (href: string) => openExternal(href),
+            //   },
+            //   null,
+            // ),
           ),
         ),
       );
