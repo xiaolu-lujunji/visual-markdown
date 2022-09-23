@@ -74,8 +74,6 @@ export default function Toolbar() {
     el.style.left = `${rect.left + window.pageXOffset - el.offsetWidth / 2 + rect.width / 2}px`;
   });
 
-  console.log('render toolbar');
-
   return createPortal(
     <Box
       ref={ref}

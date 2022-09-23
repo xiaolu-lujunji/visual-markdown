@@ -1,5 +1,5 @@
 import React from 'react';
-import { Range, Editor, Element, Node, Transforms, Path, Point } from 'slate';
+import { Range, Editor, Node, Transforms, Path } from 'slate';
 import { Editable as EditableBase, DefaultElement, useSlateStatic } from 'slate-react';
 import HeadingElement from './elements/heading';
 import HTML from './elements/html';
@@ -7,26 +7,20 @@ import Code from './elements/code';
 import Link from './elements/link';
 import styled from '@mui/material/styles/styled';
 import isHotkey from 'is-hotkey';
-import { isHeading } from './common';
-import type { NodeMatch, Ancestor } from 'slate';
+import { isParagraph } from './common';
 import type { RenderElementProps, RenderLeafProps } from 'slate-react';
-import type { Paragraph, Heading } from './spec';
+import type { Paragraph } from './spec';
 
 const HEADING_REG = /^ {0,3}(#{1,6})$/;
 const THEMATIC_BREAK_REG = /^ {0,3}((?:-[\t ]*){2,}|(?:_[ \t]*){2,}|(?:\*[ \t]*){2,})(?:\n+|$)/;
 const BLOCKQUOTE_REG = /^( {0,3}>$)/;
 const LIST_REG = /^ {0,3}(?:[*+-]|(\d{1,9})[.)])/;
-const HTML_REG = /^<([a-zA-Z\d-]+)(?=\s|>)[^<>]*?>$/;
 const CODE_REG = /^`{2,}$/;
 
 const isSpace = isHotkey('space');
-const isEnter = isHotkey('enter');
 const isThematicBreakHotKey = (event: React.KeyboardEvent<HTMLDivElement>) =>
   event.key === '-' || event.key === '_' || event.key === '*';
 const isBacktick = isHotkey('`');
-
-const isParagraph: NodeMatch<Ancestor> = (node) =>
-  Element.isElement(node) && node.type === 'paragraph';
 
 const StyledEditableBase = styled(EditableBase)({
   padding: 45,
@@ -171,45 +165,6 @@ export default function Editable(props: EditableProps) {
             );
             Transforms.removeNodes(editor, { at: Path.next(paragraphPath) });
             return;
-          }
-        }
-      }
-    } else if (isEnter(event)) {
-      if (editor.selection && Range.isCollapsed(editor.selection)) {
-        const headingEntry = Editor.above<Heading>(editor, { match: isHeading });
-        if (headingEntry) {
-          const [, headingPath] = headingEntry;
-          const end = Editor.end(editor, headingPath);
-          if (Point.equals(editor.selection.anchor, end)) {
-            event.preventDefault();
-            Transforms.insertNodes(editor, { type: 'paragraph', children: [{ text: '' }] });
-            return;
-          }
-        }
-
-        const paragraphEntry = Editor.above<Paragraph>(editor, {
-          match: isParagraph,
-        });
-        if (paragraphEntry) {
-          const [paragraph, paragraphPath] = paragraphEntry;
-          const text = Node.string(paragraph);
-          const htmlSearchResult = HTML_REG.exec(text);
-          if (htmlSearchResult) {
-            event.preventDefault();
-            const [, tag] = htmlSearchResult;
-            Transforms.insertNodes(
-              editor,
-              {
-                type: 'html',
-                value: `<${tag}></${tag}>`,
-                autoFocus: true,
-                children: [{ text: '' }],
-              },
-              {
-                at: paragraphPath,
-              },
-            );
-            editor.deleteBackward('word');
           }
         }
       }
