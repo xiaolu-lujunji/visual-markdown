@@ -61,7 +61,7 @@
   </div>
 </template>
 
-<script lang="ts">
+<script lang="tsx">
 import { shell } from 'electron';
 import path from 'path';
 import log from 'electron-log';
@@ -103,14 +103,17 @@ import { createRoot } from 'react-dom/client';
 import React from 'react';
 import { createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
-import Editor from 'editor';
+import { withHistory } from 'slate-history';
+import Editable from 'editor/editable';
+import withHeading from 'editor/plugins/with-heading';
+import withThematicBreak from 'editor/plugins/with-thematic-break';
+import withBlockquote from 'editor/plugins/with-blockquote';
+import withList from 'editor/plugins/with-list';
+import withHTML from 'editor/plugins/with-html';
+import withCode from 'editor/plugins/with-code';
+import withLink from 'editor/plugins/with-link';
 import fromMarkdown from 'editor/serializing/from-markdown';
 import toMarkdown from 'editor/serializing/to-markdown';
-import withMarkdown from 'editor/with-markdown';
-import { unified } from 'unified';
-import type { Descendant } from 'slate';
-import { getImageInfo } from './get-image-info';
-import { openExternal } from 'api/shell';
 
 const STANDAR_Y = 320;
 
@@ -557,7 +560,15 @@ export default {
       //   });
       // }
 
-      const editor = withMarkdown(withReact(createEditor()));
+      const editor = withHistory(
+        withLink(
+          withCode(
+            withHTML(
+              withList(withBlockquote(withThematicBreak(withHeading(withReact(createEditor()))))),
+            ),
+          ),
+        ),
+      );
 
       const value = fromMarkdown(this.markdown);
 
@@ -565,29 +576,18 @@ export default {
 
       const app = createRoot(ele);
       app.render(
-        React.createElement(
-          React.StrictMode,
-          {},
-          React.createElement(
-            Editor,
-            {
-              editor,
-              value,
-              onChange: (value) => {
-                const markdown = toMarkdown({ type: 'root', children: value });
-                this.$store.dispatch('LISTEN_FOR_CONTENT_CHANGE', { markdown });
-              },
-            },
-            // React.createElement(
-            //   Editable,
-            //   {
-            //     rewriteImageSrc: (src: string) => getImageInfo(src).src,
-            //     openLink: (href: string) => openExternal(href),
-            //   },
-            //   null,
-            // ),
-          ),
-        ),
+        <React.StrictMode>
+          <Slate
+            editor={editor}
+            value={value}
+            onChange={(value) => {
+              const markdown = toMarkdown({ type: 'root', children: value });
+              this.$store.dispatch('LISTEN_FOR_CONTENT_CHANGE', { markdown });
+            }}
+          >
+            <Editable />
+          </Slate>
+        </React.StrictMode>,
       );
 
       // const { container } = (this.editor = new Muya(ele, options))
@@ -1246,6 +1246,7 @@ export default {
 
 .editor-component {
   height: 100%;
+  padding: 45px;
   overflow: auto;
   box-sizing: border-box;
   cursor: default;

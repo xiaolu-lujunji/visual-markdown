@@ -1,8 +1,7 @@
-import React from 'react';
-import { Transforms } from 'slate';
+import Popover from '@mui/material/Popover';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ReactEditor, useSlateStatic } from 'slate-react';
-import TextField from '@mui/material/TextField';
-import Autocomplete from '@mui/material/Autocomplete';
+import { Transforms } from 'slate';
 import {
   EditorView,
   keymap,
@@ -34,34 +33,20 @@ import {
 } from '@codemirror/autocomplete';
 import { lintKeymap } from '@codemirror/lint';
 import { html } from '@codemirror/lang-html';
-import { css } from '@codemirror/lang-css';
-import { javascript } from '@codemirror/lang-javascript';
-import stopPropagation from '../lib/code-mirror/stop-propagation';
+import parse from 'html-react-parser';
+import { sanitize } from 'dompurify';
 import styled from '@mui/material/styles/styled';
-import type { AutocompleteChangeReason } from '@mui/material/Autocomplete';
-import type { Text } from '@codemirror/state';
 import type { RenderElementProps } from 'slate-react';
-import type { Code as CodeSpec } from '../spec';
+import type { Text } from '@codemirror/state';
+import type { HTMLReactParserOptions } from 'html-react-parser';
+import type { HTML as HTMLSpec } from '../../spec';
 
-const languages = [
-  { label: 'HTML', lang: 'html' },
-  { label: 'CSS', lang: 'css' },
-  {
-    label: 'JavaScript',
-    lang: 'javascript',
+const PreviewRoot = styled('div')({
+  whiteSpace: 'normal',
+  '&:hover': {
+    backgroundColor: '#f5f6f7',
   },
-];
-
-const language = (lang: string) => {
-  switch (lang) {
-    case 'html':
-      return html;
-    case 'css':
-      return css;
-    default:
-      return javascript;
-  }
-};
+});
 
 const CodeMirrorRoot = styled('div')({
   '.cm-line': {
@@ -69,26 +54,59 @@ const CodeMirrorRoot = styled('div')({
   },
 });
 
-export default function Code(props: RenderElementProps) {
-  const { element, attributes, children } = props;
-  const { value, lang, autoFocus } = element as CodeSpec;
+export interface HTMLProps extends RenderElementProps {
+  parserOptions?: HTMLReactParserOptions;
+}
+
+export default function HTML(props: HTMLProps) {
+  const { element, attributes, children, parserOptions } = props;
+
+  const { value, autoFocus } = element as HTMLSpec;
 
   const editor = useSlateStatic();
+
+  const anchor = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (autoFocus) {
+      setOpen(true);
+      setTimeout(() => {
+        view.focus();
+      }, 0);
+    }
+  }, []);
+
+  const handleDoubleClick = () => {
+    setOpen(true);
+    setTimeout(() => {
+      view.focus();
+    }, 0);
+  };
 
   const handleDocChanged = (doc: Text) => {
     const newValue = doc.toString();
     const path = ReactEditor.findPath(editor, element);
     Transforms.setNodes(editor, { value: newValue }, { at: path });
   };
-  const onDocChangedRef = React.useRef(handleDocChanged);
+  const onDocChangedRef = useRef(handleDocChanged);
   onDocChangedRef.current = handleDocChanged;
 
-  const state = React.useMemo(
+  const state = useMemo(
     () =>
       EditorState.create({
         doc: value,
         extensions: [
-          stopPropagation,
+          EditorView.domEventHandlers({
+            beforeinput: (event) => {
+              event.stopPropagation();
+              return false;
+            },
+            keydown: (event) => {
+              event.stopPropagation();
+              return false;
+            },
+          }),
           lineNumbers(),
           highlightActiveLineGutter(),
           highlightSpecialChars(),
@@ -115,7 +133,7 @@ export default function Code(props: RenderElementProps) {
             ...completionKeymap,
             ...lintKeymap,
           ]),
-          language(lang ?? 'javascript')(),
+          html(),
           EditorView.updateListener.of((update) => {
             if (update.docChanged) {
               onDocChangedRef.current?.(update.state.doc);
@@ -123,10 +141,10 @@ export default function Code(props: RenderElementProps) {
           }),
         ],
       }),
-    [lang],
+    [],
   );
 
-  const view = React.useMemo(
+  const view = useMemo(
     () =>
       new EditorView({
         state,
@@ -134,49 +152,30 @@ export default function Code(props: RenderElementProps) {
       }),
     [state],
   );
-  React.useEffect(() => {
-    view.focus();
-  }, [view]);
 
-  const parent = React.useCallback(
-    (node: HTMLDivElement | null) => {
-      if (node !== null) {
-        if (node.firstChild) node.removeChild(node.firstChild);
-        node.appendChild(view.dom);
-      }
-    },
-    [view],
-  );
-
-  const input = React.useRef<HTMLInputElement>(null);
-  React.useEffect(() => {
-    if (autoFocus) {
-      input.current?.focus();
+  const parent = useCallback((node: HTMLDivElement | null) => {
+    if (node !== null) {
+      node.appendChild(view.dom);
     }
   }, []);
-
-  const handleChange = (
-    event: React.SyntheticEvent<Element, Event>,
-    value: { label: string; lang: string } | null,
-    reason: AutocompleteChangeReason,
-  ) => {
-    if (reason === 'selectOption') {
-      const path = ReactEditor.findPath(editor, element);
-      Transforms.setNodes(editor, { lang: value?.lang }, { at: path });
-    }
-  };
 
   return (
     <div {...attributes} contentEditable={false}>
       {children}
-      <Autocomplete
-        disablePortal
-        options={languages}
-        sx={{ width: 300 }}
-        renderInput={(params) => <TextField inputRef={input} {...params} label="Language" />}
-        onChange={handleChange}
-      />
-      <CodeMirrorRoot ref={parent} />
+      <PreviewRoot ref={anchor} onDoubleClick={handleDoubleClick}>
+        {parse(sanitize(value), parserOptions)}
+      </PreviewRoot>
+      <Popover
+        open={open}
+        anchorEl={anchor.current}
+        onClose={() => setOpen(false)}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'center',
+        }}
+      >
+        <CodeMirrorRoot ref={parent} />
+      </Popover>
     </div>
   );
 }

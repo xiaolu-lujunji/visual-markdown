@@ -1,230 +1,41 @@
-import React from 'react';
-import { Range, Editor, Node, Transforms, Path } from 'slate';
-import { Editable as EditableBase, DefaultElement, useSlateStatic } from 'slate-react';
-import HeadingElement from './elements/heading';
-import HTML from './elements/html';
-import Code from './elements/code';
-import Link from './elements/link';
-import styled from '@mui/material/styles/styled';
-import isHotkey from 'is-hotkey';
-import { isParagraph } from './common';
-import type { RenderElementProps, RenderLeafProps } from 'slate-react';
-import type { Paragraph } from './spec';
-
-const HEADING_REG = /^ {0,3}(#{1,6})$/;
-const THEMATIC_BREAK_REG = /^ {0,3}((?:-[\t ]*){2,}|(?:_[ \t]*){2,}|(?:\*[ \t]*){2,})(?:\n+|$)/;
-const BLOCKQUOTE_REG = /^( {0,3}>$)/;
-const LIST_REG = /^ {0,3}(?:[*+-]|(\d{1,9})[.)])/;
-const CODE_REG = /^`{2,}$/;
-
-const isSpace = isHotkey('space');
-const isThematicBreakHotKey = (event: React.KeyboardEvent<HTMLDivElement>) =>
-  event.key === '-' || event.key === '_' || event.key === '*';
-const isBacktick = isHotkey('`');
-
-const StyledEditableBase = styled(EditableBase)({
-  padding: 45,
-});
-
-export const RewriteImageSrcContext =
-  // @ts-ignore
-  React.createContext<React.MutableRefObject<((src: string) => string) | undefined>>();
-
-export const OpenLinkContext =
-  // @ts-ignore
-  React.createContext<React.MutableRefObject<((href: string) => string) | undefined>>();
+import { useCallback } from 'react';
+import { Editable as EditableBase, useSlateStatic } from 'slate-react';
+import renderBaseElement from './rendering/render-element';
+import renderLeaf from './rendering/render-leaf';
+import { keyDownHeading } from './plugins/with-heading';
+import { keyDownThematicBreak } from './plugins/with-thematic-break';
+import { keyDownBlockquote } from './plugins/with-blockquote';
+import { keyDownList } from './plugins/with-list';
+import { keyDownCode } from './plugins/with-code';
+import type { RenderElementProps } from 'slate-react';
 
 export interface EditableProps {
-  rewriteImageSrc?: (src: string) => string;
-  openLink?: (href: string) => string;
+  renderElement?: (props: RenderElementProps) => JSX.Element | undefined;
 }
 
 export default function Editable(props: EditableProps) {
-  const { rewriteImageSrc, openLink } = props;
-
-  const rewriteImageSrcRef = React.useRef(rewriteImageSrc);
-  rewriteImageSrcRef.current = rewriteImageSrc;
-
-  const openLinkRef = React.useRef(openLink);
-  openLinkRef.current = openLink;
-
   const editor = useSlateStatic();
 
-  const renderElement = React.useCallback((props: RenderElementProps) => {
-    const { element, attributes, children } = props;
-    switch (element.type) {
-      case 'paragraph':
-        return <p {...attributes}>{children}</p>;
-      case 'heading':
-        return <HeadingElement {...props} />;
-      case 'thematicBreak':
-        return (
-          <div {...attributes} contentEditable={false}>
-            {children}
-            <hr />
-          </div>
-        );
-      case 'blockquote':
-        return <blockquote {...attributes}>{children}</blockquote>;
-      case 'list':
-        return React.createElement(
-          element.ordered ? 'ol' : 'ul',
-          { ...attributes, start: element.start },
-          children,
-        );
-      case 'listItem':
-        return <li {...attributes}>{children}</li>;
-      case 'html':
-        return <HTML {...props} />;
-      case 'code':
-        return <Code {...props} />;
-      case 'link':
-        return <Link {...props} />;
-      default:
-        return <DefaultElement {...props} />;
-    }
-  }, []);
+  const renderElement = useCallback(
+    (renderElementProps: RenderElementProps) => {
+      const customElement = props.renderElement?.(renderElementProps);
+      if (customElement !== undefined) return customElement;
+      return renderBaseElement(renderElementProps);
+    },
+    [props.renderElement],
+  );
 
-  const renderLeaf = React.useCallback((props: RenderLeafProps) => {
-    const { leaf, attributes, children } = props;
-    const { emphasis, strong, inlineCode } = leaf;
-
-    const Component = inlineCode ? 'code' : 'span';
-
-    return (
-      <Component
-        {...attributes}
-        style={{
-          fontStyle: emphasis ? 'italic' : 'normal',
-          fontWeight: strong ? 'bold' : 'normal',
-        }}
-      >
-        {children}
-      </Component>
-    );
-  }, []);
-
-  const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = React.useCallback((event) => {
-    if (isSpace(event)) {
-      if (editor.selection && Range.isCollapsed(editor.selection)) {
-        const paragraphEntry = Editor.above<Paragraph>(editor, {
-          match: isParagraph,
-        });
-        if (paragraphEntry) {
-          const [paragraph, paragraphPath] = paragraphEntry;
-          const text = Node.string(paragraph);
-          const searchHeadingResult = HEADING_REG.exec(text);
-          if (searchHeadingResult) {
-            event.preventDefault();
-            const [, numberSigns] = searchHeadingResult;
-            const depth = numberSigns.length as 1 | 2 | 3 | 4 | 5 | 6;
-            Transforms.insertNodes(
-              editor,
-              { type: 'heading', depth, children: [{ text: '' }] },
-              {
-                at: paragraphPath,
-              },
-            );
-            Transforms.removeNodes(editor, { at: Path.next(paragraphPath) });
-            return;
-          }
-          const searchBlockquoteResult = BLOCKQUOTE_REG.exec(text);
-          if (searchBlockquoteResult) {
-            event.preventDefault();
-            Transforms.insertNodes(
-              editor,
-              {
-                type: 'blockquote',
-                children: [{ type: 'paragraph', children: [{ text: '' }] }],
-              },
-              {
-                at: paragraphPath,
-              },
-            );
-            Transforms.removeNodes(editor, { at: Path.next(paragraphPath) });
-            return;
-          }
-          const searchListResult = LIST_REG.exec(text);
-          if (searchListResult) {
-            event.preventDefault();
-            const [, start] = searchListResult;
-            const ordered = start !== undefined;
-            Transforms.insertNodes(
-              editor,
-              {
-                type: 'list',
-                ordered,
-                start: ordered ? window.parseInt(start, 10) : undefined,
-                children: [
-                  { type: 'listItem', children: [{ type: 'paragraph', children: [{ text: '' }] }] },
-                ],
-              },
-              {
-                at: paragraphPath,
-              },
-            );
-            Transforms.removeNodes(editor, { at: Path.next(paragraphPath) });
-            return;
-          }
-        }
-      }
-    } else if (isThematicBreakHotKey(event)) {
-      if (editor.selection && Range.isCollapsed(editor.selection)) {
-        const paragraphEntry = Editor.above<Paragraph>(editor, { match: isParagraph });
-        if (paragraphEntry) {
-          const [paragraph, paragraphPath] = paragraphEntry;
-          const text = Node.string(paragraph);
-          const searchResult = THEMATIC_BREAK_REG.exec(text);
-          if (searchResult) {
-            event.preventDefault();
-            Transforms.insertNodes(
-              editor,
-              { type: 'thematicBreak', children: [{ text: '' }] },
-              {
-                at: paragraphPath,
-              },
-            );
-            editor.deleteBackward('word');
-          }
-        }
-      }
-    } else if (isBacktick(event)) {
-      if (editor.selection && Range.isCollapsed(editor.selection)) {
-        const paragraphEntry = Editor.above<Paragraph>(editor, {
-          match: isParagraph,
-        });
-        if (paragraphEntry) {
-          const [paragraph, paragraphPath] = paragraphEntry;
-          const text = Node.string(paragraph);
-          const searchCodeResult = CODE_REG.exec(text);
-          if (searchCodeResult) {
-            event.preventDefault();
-            Transforms.insertNodes(
-              editor,
-              { type: 'code', value: '', autoFocus: true, children: [{ text: '' }] },
-              {
-                at: paragraphPath,
-              },
-            );
-            editor.deleteBackward('word');
-            return;
-          }
-        }
-      }
-    }
+  const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = useCallback((event) => {
+    if (keyDownHeading(editor, event)) return;
+    if (keyDownThematicBreak(editor, event)) return;
+    if (keyDownBlockquote(editor, event)) return;
+    if (keyDownList(editor, event)) return;
+    if (keyDownCode(editor, event)) return;
   }, []);
 
   console.log('render editable');
 
   return (
-    <RewriteImageSrcContext.Provider value={rewriteImageSrcRef}>
-      <OpenLinkContext.Provider value={openLinkRef}>
-        <StyledEditableBase
-          renderElement={renderElement}
-          renderLeaf={renderLeaf}
-          onKeyDown={handleKeyDown}
-        />
-      </OpenLinkContext.Provider>
-    </RewriteImageSrcContext.Provider>
+    <EditableBase renderElement={renderElement} renderLeaf={renderLeaf} onKeyDown={handleKeyDown} />
   );
 }
