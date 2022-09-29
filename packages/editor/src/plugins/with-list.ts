@@ -33,6 +33,7 @@ export function keyDownList(editor: ReactEditor, event: React.KeyboardEvent<HTML
         Transforms.removeNodes(editor, {
           at: Path.next(path),
         });
+        Transforms.select(editor, path);
         return true;
       }
     }
@@ -129,6 +130,36 @@ export default function withList(editor: ReactEditor) {
           at: listPath,
         });
         if (ancestorListItemEntry) {
+          Transforms.liftNodes(editor, {
+            at: listItemPath,
+          });
+          const liftedListItemEntry = Editor.above(editor, {
+            match: (node) => Element.isElement(node) && node.type === 'listItem',
+          });
+          if (liftedListItemEntry) {
+            const [, liftedListItemPath] = liftedListItemEntry;
+            const notLastChild = list.children.length - 1 !== listItemPath.at(-1);
+            if (notLastChild) {
+              const nextListPath = Path.next(liftedListItemPath);
+              const toPath = liftedListItemPath.concat(listItem.children.length);
+              Transforms.moveNodes(editor, {
+                at: nextListPath,
+                to: toPath,
+              });
+              const hasListChild = listItem.children.some(
+                (child) => Element.isElement(child) && child.type === 'list',
+              );
+              if (hasListChild) {
+                Transforms.mergeNodes(editor, {
+                  at: toPath,
+                });
+              }
+            }
+            Transforms.liftNodes(editor, {
+              at: liftedListItemPath,
+            });
+            return;
+          }
         } else {
           Transforms.liftNodes(editor, {
             at: listItemPath,
@@ -142,9 +173,16 @@ export default function withList(editor: ReactEditor) {
           );
           const notLastChild = list.children.length - 1 !== listItemPath.at(-1);
           if (hasListChild && notLastChild) {
-            Transforms.mergeNodes(editor, {
-              at: Path.next(Path.next(Path.next(listPath))),
+            const paragraphEntry = Editor.above(editor, {
+              match: (node) => Element.isElement(node) && node.type === 'paragraph',
             });
+            if (paragraphEntry) {
+              const [, paragraphPath] = paragraphEntry;
+              const nextListPath = Path.next(Path.next(paragraphPath));
+              Transforms.mergeNodes(editor, {
+                at: nextListPath,
+              });
+            }
           }
           return;
         }
