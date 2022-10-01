@@ -51,6 +51,12 @@ export default function withList(editor: ReactEditor) {
         const [listItem, listItemPath] = listItemEntry;
         if (Point.equals(Editor.start(editor, listItemPath), editor.selection.anchor)) {
           const nested = isListNested(editor, listItemPath);
+
+          if (!nested) {
+            moveListItemUp(editor, listItemEntry);
+            return;
+          }
+
           if (nested && hasListChild(listItem)) {
             if (Path.hasPrevious(listItemPath)) {
               // move sub-lis to the previous li
@@ -83,21 +89,6 @@ export default function withList(editor: ReactEditor) {
               });
             }
           }
-
-          if (!nested) {
-            moveListItemUp(editor, listItemEntry);
-            return;
-          }
-
-          // Transforms.insertNodes(
-          //   editor,
-          //   { type: 'paragraph', children: [{ text: '' }] },
-          //   { at: path },
-          // );
-          // Transforms.removeNodes(editor, {
-          //   at: Path.next(path),
-          // });
-          // return;
         }
       }
     }
