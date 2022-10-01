@@ -284,6 +284,7 @@ export interface Link extends Resource {
 
 export interface Image extends Node, Resource, Alternative {
   type: 'image';
+  children: [{ text: '' }];
 }
 
 export interface LinkReference extends Reference {

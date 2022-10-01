@@ -112,6 +112,7 @@ import withList from 'editor/plugins/with-list';
 import withHTML from 'editor/plugins/with-html';
 import withCode from 'editor/plugins/with-code';
 import withLink from 'editor/plugins/with-link';
+import withImage from 'editor/plugins/with-image';
 import fromMarkdown from 'editor/serializing/from-markdown';
 import toMarkdown from 'editor/serializing/to-markdown';
 
@@ -561,13 +562,13 @@ export default {
       // }
 
       const editor = withHistory(
-        withLink(
+        withImage(withLink(
           withCode(
             withHTML(
               withList(withBlockquote(withThematicBreak(withHeading(withReact(createEditor()))))),
             ),
           ),
-        ),
+        ),)
       );
 
       const value = fromMarkdown(this.markdown);

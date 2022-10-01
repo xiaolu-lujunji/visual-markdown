@@ -16,6 +16,7 @@ const slateCompile: Plugin<void[], any, Root> = function slateCompile() {
         case 'thematicBreak':
         case 'html':
         case 'code':
+        case 'image':
           return omit(node, 'children');
         case 'paragraph':
         case 'heading':

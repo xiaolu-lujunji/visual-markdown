@@ -4,6 +4,7 @@ import HTML from './elements/html';
 import Code from './elements/code';
 import { createElement } from 'react';
 import type { RenderElementProps } from 'slate-react';
+import Image from './elements/image';
 
 export default function renderElement(props: RenderElementProps) {
   const { attributes, element, children } = props;
@@ -40,6 +41,8 @@ export default function renderElement(props: RenderElementProps) {
           {children}
         </a>
       );
+    case 'image':
+      return <Image {...props} />;
     default:
       return <DefaultElement {...props} />;
   }

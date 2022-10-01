@@ -11,6 +11,7 @@ import type {
   HTML,
   Code,
   Link,
+  Image,
 } from './spec';
 
 declare module 'slate' {
@@ -25,7 +26,8 @@ declare module 'slate' {
       | ListItem
       | HTML
       | Code
-      | Link;
+      | Link
+      | Image;
     Text: Text;
   }
 }
