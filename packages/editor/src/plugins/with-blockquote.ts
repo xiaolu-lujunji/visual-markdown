@@ -30,7 +30,29 @@ export function keyDownBlockquote(editor: ReactEditor, event: React.KeyboardEven
 }
 
 export default function withBlockquote(editor: ReactEditor) {
-  const { deleteBackward } = editor;
+  const { insertBreak, deleteBackward } = editor;
+
+  editor.insertBreak = () => {
+    const blockquoteEntry = Editor.above(editor, {
+      match: (node) => Element.isElement(node) && node.type === 'blockquote',
+    });
+    if (blockquoteEntry) {
+      const [blockquote, blockquotePath] = blockquoteEntry;
+      const lastChild = blockquote.children.at(-1);
+      if (
+        Element.isElement(lastChild) &&
+        lastChild.type === 'paragraph' &&
+        Node.string(lastChild) === ''
+      ) {
+        Transforms.liftNodes(editor, {
+          at: blockquotePath.concat(blockquote.children.length - 1),
+        });
+        return;
+      }
+    }
+
+    insertBreak();
+  };
 
   editor.deleteBackward = (unit) => {
     if (editor.selection && Range.isCollapsed(editor.selection)) {

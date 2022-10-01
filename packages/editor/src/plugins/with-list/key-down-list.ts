@@ -36,11 +36,8 @@ export default function keyDownList(editor: Editor, event: React.KeyboardEvent<H
         return true;
       }
     }
-  } else if (
-    isHotkey('shift?+tab')(event) &&
-    editor.selection &&
-    Range.isCollapsed(editor.selection)
-  ) {
+  }
+  if (isHotkey('shift?+tab')(event) && editor.selection && Range.isCollapsed(editor.selection)) {
     const nodeEntry = Editor.above(editor, {
       match: (node) => Element.isElement(node) && node.type === 'listItem',
     });
