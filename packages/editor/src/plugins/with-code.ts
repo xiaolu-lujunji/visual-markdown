@@ -13,6 +13,7 @@ export function keyDownCode(editor: ReactEditor, event: React.KeyboardEvent<HTML
       const [node, path] = nodeEntry;
       const searchResult = CODE_REG.exec(Node.string(node));
       if (searchResult) {
+        event.preventDefault();
         editor.deleteBackward('word');
         Transforms.insertNodes(
           editor,
